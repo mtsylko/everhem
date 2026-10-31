@@ -23,9 +23,16 @@ export type Selection = Readonly<Record<string, string>>;
  */
 const CHOSEN_BY_SHOPPER = new Set(["size"]);
 
+/**
+ * URL-safe and readable in every language: "Złamana biel" becomes zlamana-biel. NFD splits letters
+ * from their marks, all but ł, which is a letter of its own.
+ */
 export function slugify(text: string): string {
   return text
     .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/ł/g, "l")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }

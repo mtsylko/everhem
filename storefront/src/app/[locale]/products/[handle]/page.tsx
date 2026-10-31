@@ -11,6 +11,10 @@ import {
   type Product,
 } from "@/components/product/product-client";
 import { ProductTile } from "@/components/product-tile";
+import { format } from "@/i18n/format";
+import { localePath } from "@/i18n/locales";
+import { alternates } from "@/i18n/metadata";
+import { getDictionary, getLocale } from "@/i18n/server";
 import { orderGallery, resolveSelection } from "@/lib/product/variants";
 import { getCollection, getProduct, getProductHandles } from "@/lib/shopify/catalog";
 
@@ -23,8 +27,9 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/products/[handle]">): Promise<Metadata> {
-  const product = await getProduct((await params).handle);
+}: PageProps<"/[locale]/products/[handle]">): Promise<Metadata> {
+  const { handle } = await params;
+  const product = await getProduct(handle);
   if (!product) return {};
   const image = product.images.nodes[0];
   return {
@@ -33,19 +38,25 @@ export async function generateMetadata({
     openGraph: image
       ? { images: [{ url: image.url, width: image.width ?? undefined, alt: image.altText ?? "" }] }
       : undefined,
+    alternates: alternates(await getLocale(), `/products/${handle}`),
   };
 }
 
-export default function ProductPage({ params }: PageProps<"/products/[handle]">) {
+export default async function ProductPage({ params }: PageProps<"/[locale]/products/[handle]">) {
+  const { loading } = await getDictionary();
   return (
-    <Suspense fallback={<p className="px-gutter py-section">Loading…</p>}>
+    <Suspense fallback={<p className="px-gutter py-section">{loading}</p>}>
       <ProductDetails handle={params.then((p) => p.handle)} />
     </Suspense>
   );
 }
 
 async function ProductDetails({ handle }: { handle: Promise<string> }) {
-  const product = await getProduct(await handle);
+  const [product, locale, dictionary] = await Promise.all([
+    handle.then(getProduct),
+    getLocale(),
+    getDictionary(),
+  ]);
   if (!product) notFound();
 
   // What the page shows before the URL is read: the first colour in stock, no size.
@@ -78,7 +89,7 @@ async function ProductDetails({ handle }: { handle: Promise<string> }) {
         <div className="lg:sticky lg:top-24 lg:col-span-4 lg:col-start-9 lg:self-start">
           {collection && (
             <Link
-              href={`/collections/${collection.handle}`}
+              href={localePath(locale, `/collections/${collection.handle}`)}
               className="enter inline-block text-muted underline-offset-4 [--enter-step:1] hover:text-ink hover:underline"
             >
               {collection.title}
@@ -106,13 +117,13 @@ async function ProductDetails({ handle }: { handle: Promise<string> }) {
           <dl className="rise mt-8 space-y-6 bg-surface p-6">
             {product.fabric?.value && (
               <div>
-                <dt className="font-medium">Fabric</dt>
+                <dt className="font-medium">{dictionary.product.fabric}</dt>
                 <dd>{product.fabric.value}</dd>
               </div>
             )}
             {care.length > 0 && (
               <div>
-                <dt className="font-medium">Care</dt>
+                <dt className="font-medium">{dictionary.product.care}</dt>
                 <dd>
                   <ul>
                     {care.map((step) => (
@@ -140,7 +151,10 @@ async function Related({
   collectionHandle: string;
   exclude: string;
 }) {
-  const collection = await getCollection(collectionHandle);
+  const [collection, dictionary] = await Promise.all([
+    getCollection(collectionHandle),
+    getDictionary(),
+  ]);
   const products = collection?.products.nodes
     .filter((product) => product.handle !== exclude)
     .slice(0, RELATED_COUNT);
@@ -149,7 +163,7 @@ async function Related({
   return (
     <section aria-labelledby="related-title" className="mt-section px-gutter">
       <h2 id="related-title" className="rise mb-8 text-head font-medium">
-        More {collection.title.toLowerCase()}
+        {format(dictionary.product.more, { collectionLower: collection.title.toLowerCase() })}
       </h2>
       <ul className="grid grid-cols-2 gap-x-2 lg:grid-cols-4">
         {products.map((product, index) => (

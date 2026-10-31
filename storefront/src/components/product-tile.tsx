@@ -2,6 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { ProductCardFragment } from "../../generated/storefront.generated";
+import { formatPlural } from "@/i18n/format";
+import { localePath } from "@/i18n/locales";
+import { getDictionary, getLocale } from "@/i18n/server";
 import { fieldFor } from "./fields";
 import { Price } from "./price";
 
@@ -23,18 +26,22 @@ interface ProductTileProps {
  * on one line and its captions start on one. A double tile's picture runs down to the foot of the
  * second row's pictures. The tile brings its own space beneath, so its list has no row gap.
  */
-export function ProductTile({
+export async function ProductTile({
   product,
   index,
   double = false,
   eager = false,
   enterStep,
 }: ProductTileProps) {
+  const [locale, { product: words }] = await Promise.all([getLocale(), getDictionary()]);
   // Only the first picture: the next ones are mostly other colours, which would read as a recolour.
   const [front] = product.images.nodes;
   const colours = product.options.find((option) => option.name === "Color")?.optionValues.length;
   // A sold-out piece says so; one that can be bought says why it's featured, if it is.
-  const label = product.availableForSale ? product.featured?.value : "Sold out";
+  const reason = product.featured?.value;
+  const label = product.availableForSale
+    ? reason && (words.featured[reason] ?? reason)
+    : words.soldOut;
   const sizes = double
     ? "(min-width: 1024px) 50vw, (min-width: 768px) 66vw, 100vw"
     : "(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw";
@@ -45,7 +52,7 @@ export function ProductTile({
       style={enterStep === undefined ? undefined : ({ "--enter-step": enterStep } as CSSProperties)}
     >
       <Link
-        href={`/products/${product.handle}`}
+        href={localePath(locale, `/products/${product.handle}`)}
         className="group row-span-full grid grid-rows-subgrid"
       >
         {/*
@@ -84,7 +91,9 @@ export function ProductTile({
           {/* The colour count holds on to the fabric's last word, so it never wraps alone. */}
           <p className="mt-1 text-small text-pretty text-muted">
             {product.fabric?.value}
-            {colours && colours > 1 ? `\u00a0·\u00a0${colours}\u00a0colours` : null}
+            {colours && colours > 1
+              ? `\u00a0·\u00a0${formatPlural(locale, words.colours, colours).replace(" ", "\u00a0")}`
+              : null}
           </p>
         </div>
       </Link>

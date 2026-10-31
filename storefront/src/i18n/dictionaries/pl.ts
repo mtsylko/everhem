@@ -1,0 +1,105 @@
+import { plural } from "../format";
+import type { Dictionary } from "./en";
+
+// Polish typesetting keeps one-letter words (a, i, o, u, w, z) with the next word: hence \u00a0.
+export const pl: Dictionary = {
+  meta: {
+    title: "Everhem: ubrania na co dzień z naturalnych włókien",
+    description:
+      "T-shirty, bluzy i swetry z bawełny organicznej, lnu, wełny merino i kaszmiru. Sklep demonstracyjny na Shopify Storefront API.",
+  },
+  layout: {
+    skipToContent: "Przejdź do treści",
+    collections: "Kolekcje",
+    language: "Język",
+  },
+  shopTheBasics: "Zobacz kolekcję",
+  loading: "Ładowanie…",
+  home: {
+    heroTitle: "Ubrania na co dzień z\u00a0naturalnych włókien",
+    heroLead: "Bawełna organiczna, len, merino i\u00a0kaszmir. Uszyte, by służyły latami.",
+    collectionFrom: "{collection} od {price}",
+    catalogueTitle: plural({
+      one: "Jeden model",
+      few: "Wszystkie {count} modele",
+      many: "Wszystkie {count} modeli",
+      other: "Wszystkie modele: {count}",
+    }),
+    catalogueLead:
+      "T-shirty, bluzy i\u00a0swetry w\u00a0rozmiarach od XS do XL. Każdy model pokazujemy w\u00a0pierwszym kolorze, pozostałe znajdziesz na jego stronie.",
+    coloursTitle: "Według koloru",
+    stylesInColour: plural({
+      one: "{colour}: jeden model",
+      few: "{colour}: {count} modele",
+      many: "{colour}: {count} modeli",
+      other: "{colour}: {count}",
+    }),
+    mosaicTitle: "Na lata, nie na sezon",
+    heaviestFabric: "Dresówka naszej grubej bluzy oversize, najcięższy materiał, jakiego używamy.",
+    preWashed: "Wstępnie uprana dzianina, która zachowuje kształt i\u00a0rozmiar.",
+    hoodies: "Bluzy z\u00a0miękkiej dresówki drapanej i\u00a0pętelkowej, bez logo.",
+    woolCareTitle: "Pielęgnacja wełny",
+    woolCare: [
+      "Prać ręcznie w\u00a0zimnej wodzie lub w\u00a0programie do wełny",
+      "Suszyć na płasko, z\u00a0dala od źródeł ciepła",
+      "Nie suszyć w\u00a0suszarce bębnowej",
+      "Odświeżać parą między noszeniami",
+    ],
+  },
+  product: {
+    soldOut: "Wyprzedane",
+    featured: { New: "Nowość", Bestseller: "Bestseller", "Staff pick": "Wybór zespołu" },
+    colours: plural({
+      one: "{count} kolor",
+      few: "{count} kolory",
+      many: "{count} kolorów",
+      other: "{count} koloru",
+    }),
+    salePrice: "Cena promocyjna",
+    was: "wcześniej",
+    pictures: "Zdjęcia: {title}",
+    options: { Color: "Kolor", Size: "Rozmiar" },
+    soldOutOption: "(wyprzedane)",
+    addToBag: "Dodaj do koszyka",
+    adding: "Dodawanie…",
+    chooseSize: "Najpierw wybierz rozmiar.",
+    fabric: "Skład",
+    care: "Pielęgnacja",
+    more: "Zobacz też inne {collectionLower}",
+  },
+  cart: {
+    bag: "Koszyk",
+    items: plural({ one: "produkt", few: "produkty", many: "produktów", other: "produktu" }),
+    title: "Twój koszyk",
+    close: "Zamknij",
+    loading: "Ładowanie koszyka…",
+    empty: "Twój koszyk jest pusty.",
+    subtotal: "Wartość koszyka",
+    taxesAtCheckout: "Dostawę i\u00a0podatki doliczymy przy płatności.",
+    checkOut: "Przejdź do kasy",
+    oneFewer: "Jedna sztuka mniej: {title}",
+    oneMore: "Jedna sztuka więcej: {title}",
+    quantity: "Liczba sztuk",
+    remove: "Usuń",
+    failed: "Coś poszło nie tak. Spróbuj ponownie.",
+  },
+  footer: {
+    label: "Stopka",
+    about: "Everhem to sklep demonstracyjny: headless frontend w\u00a0Next.js na Shopify.",
+    fictional:
+      "Marka jest fikcyjna. Zamówienia trafiają do deweloperskiego sklepu Shopify i\u00a0nigdy nie są wysyłane.",
+    allBasics: "Wszystkie modele",
+    builtWith: "Zbudowane w\u00a0Next.js 16, React 19 i\u00a0Shopify Storefront API.",
+    source: "Kod na GitHubie",
+  },
+  error: {
+    title: "Sklep nie odpowiada",
+    body: "Nie udało się teraz pobrać katalogu z\u00a0Shopify. Zwykle pomaga ponowna próba.",
+    retry: "Spróbuj ponownie",
+  },
+  notFound: {
+    title: "Tej strony nie ma w\u00a0katalogu",
+    body: "Link może być nieaktualny albo produkt został wycofany z\u00a0oferty.",
+    back: "Zobacz wszystkie modele",
+  },
+};

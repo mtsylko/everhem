@@ -3,12 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { formatPlural } from "@/i18n/format";
+import { useI18n } from "@/i18n/i18n-context";
+import { localePath } from "@/i18n/locales";
 import type { ColourEntry } from "@/lib/product/colours";
 
 type Picture = { url: string; altText?: string | null };
 
 /** Pick a colour, see everything that comes in it. Pointing at a name is enough on a desktop. */
 export function ColourFinder({ colours }: { colours: readonly ColourEntry<Picture>[] }) {
+  const { locale, dictionary } = useI18n();
   const [selected, setSelected] = useState(0);
   const colour = colours[selected];
   if (!colour) return null;
@@ -20,7 +24,7 @@ export function ColourFinder({ colours }: { colours: readonly ColourEntry<Pictur
     >
       <div className="lg:col-span-5 lg:pb-[6svh]">
         <h2 id="colours-title" className="rise text-head font-medium text-muted">
-          Shop by colour
+          {dictionary.home.coloursTitle}
         </h2>
         <ul className="rise flex flex-wrap gap-x-6 text-head font-medium lg:block">
           {colours.map((entry, index) => (
@@ -60,14 +64,16 @@ export function ColourFinder({ colours }: { colours: readonly ColourEntry<Pictur
 
         <div aria-live="polite" className="w-full lg:max-w-64 lg:pb-[6svh]">
           <p className="font-medium">
-            {colour.products.length === 1 ? "One style" : `${colour.products.length} styles`} in{" "}
-            {colour.name.toLowerCase()}
+            {formatPlural(locale, dictionary.home.stylesInColour, colour.products.length, {
+              colour: colour.name,
+              colourLower: colour.name.toLowerCase(),
+            })}
           </p>
           <ul className="mt-2 space-y-1">
             {colour.products.map((product) => (
               <li key={product.handle}>
                 <Link
-                  href={`/products/${product.handle}?color=${colour.slug}`}
+                  href={`${localePath(locale, `/products/${product.handle}`)}?color=${colour.slug}`}
                   className="underline-offset-4 hover:underline"
                 >
                   {product.title}

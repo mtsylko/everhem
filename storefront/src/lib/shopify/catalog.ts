@@ -1,7 +1,17 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
+import { getLocale } from "@/i18n/server";
+import { languageCode } from "@/i18n/locales";
 import { storefront } from "./client";
 import { IMAGE_FRAGMENT, MONEY_FRAGMENT, PRODUCT_CARD_FRAGMENT } from "./fragments";
+
+/**
+ * Catalog reads run in the page's language: Shopify answers with its translations, and falls back
+ * to English where there are none. The locale comes from the URL, so it is part of every cache key.
+ */
+async function language() {
+  return languageCode(await getLocale());
+}
 
 /** One tag for the whole catalog: it is small, and one webhook can refresh all of it. */
 export const CATALOG_TAG = "catalog";
@@ -14,7 +24,7 @@ function isListed(collection: { handle: string }): boolean {
 }
 
 const COLLECTIONS_QUERY = `#graphql
-  query Collections {
+  query Collections($language: LanguageCode) @inContext(language: $language) {
     collections(first: 20, sortKey: ID) {
       nodes {
         handle
@@ -40,7 +50,8 @@ const COLLECTIONS_QUERY = `#graphql
 `;
 
 const PRODUCTS_QUERY = `#graphql
-  query Products($first: Int!, $sortKey: ProductSortKeys) {
+  query Products($first: Int!, $sortKey: ProductSortKeys, $language: LanguageCode)
+  @inContext(language: $language) {
     products(first: $first, sortKey: $sortKey) {
       nodes {
         ...ProductCard
@@ -53,7 +64,8 @@ const PRODUCTS_QUERY = `#graphql
 `;
 
 const COLLECTION_QUERY = `#graphql
-  query Collection($handle: String!) {
+  query Collection($handle: String!, $language: LanguageCode)
+  @inContext(language: $language) {
     collection(handle: $handle) {
       handle
       title
@@ -76,7 +88,7 @@ const COLLECTION_QUERY = `#graphql
 `;
 
 const PRODUCT_QUERY = `#graphql
-  query Product($handle: String!) {
+  query Product($handle: String!, $language: LanguageCode) @inContext(language: $language) {
     product(handle: $handle) {
       id
       handle
@@ -151,7 +163,7 @@ const PRODUCT_QUERY = `#graphql
 `;
 
 const COLOUR_INDEX_QUERY = `#graphql
-  query ColourIndex {
+  query ColourIndex($language: LanguageCode) @inContext(language: $language) {
     products(first: 50, sortKey: BEST_SELLING) {
       nodes {
         handle
@@ -189,7 +201,7 @@ export async function getCollections() {
   "use cache";
   cacheLife("hours");
   cacheTag(CATALOG_TAG);
-  const { collections } = await storefront(COLLECTIONS_QUERY);
+  const { collections } = await storefront(COLLECTIONS_QUERY, { language: await language() });
   return collections.nodes.filter(isListed);
 }
 
@@ -197,7 +209,11 @@ export async function getProducts(sortKey: "BEST_SELLING" | "CREATED_AT" = "BEST
   "use cache";
   cacheLife("hours");
   cacheTag(CATALOG_TAG);
-  const { products } = await storefront(PRODUCTS_QUERY, { first: 50, sortKey });
+  const { products } = await storefront(PRODUCTS_QUERY, {
+    first: 50,
+    sortKey,
+    language: await language(),
+  });
   return products.nodes;
 }
 
@@ -205,7 +221,7 @@ export async function getCollection(handle: string) {
   "use cache";
   cacheLife("hours");
   cacheTag(CATALOG_TAG);
-  const { collection } = await storefront(COLLECTION_QUERY, { handle });
+  const { collection } = await storefront(COLLECTION_QUERY, { handle, language: await language() });
   return collection && isListed(collection) ? collection : null;
 }
 
@@ -213,7 +229,7 @@ export async function getProduct(handle: string) {
   "use cache";
   cacheLife("hours");
   cacheTag(CATALOG_TAG);
-  const { product } = await storefront(PRODUCT_QUERY, { handle });
+  const { product } = await storefront(PRODUCT_QUERY, { handle, language: await language() });
   if (!product) return null;
   return { ...product, collections: { nodes: product.collections.nodes.filter(isListed) } };
 }
@@ -222,7 +238,7 @@ export async function getColourIndex() {
   "use cache";
   cacheLife("hours");
   cacheTag(CATALOG_TAG);
-  const { products } = await storefront(COLOUR_INDEX_QUERY);
+  const { products } = await storefront(COLOUR_INDEX_QUERY, { language: await language() });
   return products.nodes;
 }
 

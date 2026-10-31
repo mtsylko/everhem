@@ -186,6 +186,24 @@ npm run start -w storefront     # serve the production build
 - **Types come from codegen**, as in the seed: `npm run codegen -w storefront` checks every
   query against the Storefront API schema.
 
+### Languages
+
+The storefront is in English and Polish: `/en/...` and `/pl/...`.
+
+- **Every page prerenders once per language.** The language is the first URL segment, and the
+  root layout sits under it (`app/[locale]`). Any Server Component reads it with
+  `next/root-params`, and inside `"use cache"` it becomes part of the cache key.
+- **A URL without a language is redirected.** The proxy picks the language the shopper chose
+  before (a cookie set by the switcher), or else the first one their browser asks for.
+- **Catalogue text comes from Shopify.** Every query runs `@inContext(language:)`, so Shopify
+  answers with the seed's translations and falls back to English where there are none. A cart is
+  created in the page's language, so its checkout is too.
+- **The storefront's own words are in dictionaries** (`src/i18n/dictionaries`), typed against the
+  English one, with Polish plural forms picked by `Intl.PluralRules`. Client Components get the
+  page's dictionary through context; Server Actions are given the locale as an argument.
+- **Search engines see each language.** Pages link their other language with `hreflang`. Set
+  `SITE_URL` in `.env.local` so those links are absolute and point at the real site.
+
 A development store keeps its password page, and Shopify's checkout shows it before the
 checkout. The password is in the admin under **Online Store → Preferences**.
 
@@ -207,9 +225,11 @@ seed/
 └── test/
 storefront/
 ├── src/
-│   ├── app/            # routes: home, collections/[handle], products/[handle]
+│   ├── app/[locale]/   # routes per language: home, collections/[handle], products/[handle]
 │   ├── components/     # tiles, catalogue grid, product picker, cart drawer, home sections
-│   └── lib/            # Storefront API client and queries, cart actions, variant logic, money
+│   ├── i18n/           # locales, dictionaries, message formatting
+│   ├── lib/            # Storefront API client and queries, cart actions, variant logic, money
+│   └── proxy.ts        # sends a URL without a language to the shopper's own
 ├── generated/          # GraphQL types from codegen
 └── test/
 ```

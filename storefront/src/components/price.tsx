@@ -1,3 +1,4 @@
+import { getDictionary } from "@/i18n/server";
 import { formatMoney, isOnSale, type Money } from "@/lib/money";
 
 interface PriceProps {
@@ -6,15 +7,16 @@ interface PriceProps {
   className?: string;
 }
 
-export function Price({ price, compareAt, className }: PriceProps) {
+export async function Price({ price, compareAt, className }: PriceProps) {
   if (!isOnSale(price, compareAt)) return <p className={className}>{formatMoney(price)}</p>;
 
+  const { product } = await getDictionary();
   return (
     <p className={className}>
-      <span className="sr-only">Sale price </span>
+      <span className="sr-only">{product.salePrice} </span>
       {formatMoney(price)}{" "}
       <del className="text-muted">
-        <span className="sr-only">was </span>
+        <span className="sr-only">{product.was} </span>
         {formatMoney(compareAt)}
       </del>
     </p>

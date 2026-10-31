@@ -1,20 +1,15 @@
 import Image from "next/image";
+import { getDictionary } from "@/i18n/server";
 
 type Picture = { url: string; altText?: string | null };
-
-const WOOL_CARE = [
-  "Hand wash cold or use a wool cycle",
-  "Dry flat, away from direct heat",
-  "Do not tumble dry",
-  "Steam to refresh between wears",
-];
 
 /**
  * What the garments are made of, as a board of unlike tiles. The copy restates the catalogue:
  * fabric weights, descriptions and care steps from seed/catalog/products.ts.
  */
-export function Mosaic({ pictures }: { pictures: readonly [Picture, Picture] }) {
+export async function Mosaic({ pictures }: { pictures: readonly [Picture, Picture] }) {
   const [large, wide] = pictures;
+  const { home } = await getDictionary();
 
   return (
     <section
@@ -25,7 +20,7 @@ export function Mosaic({ pictures }: { pictures: readonly [Picture, Picture] }) 
         id="mosaic-title"
         className="rise col-span-2 bg-surface p-6 text-head font-medium lg:col-span-6 lg:col-start-7 lg:row-span-3 lg:row-start-1"
       >
-        Made for years, not a season
+        {home.mosaicTitle}
       </h2>
 
       <Tile className="col-span-2 aspect-[4/5] bg-oatmeal lg:col-span-6 lg:col-start-1 lg:row-span-5 lg:row-start-1 lg:aspect-auto">
@@ -40,23 +35,21 @@ export function Mosaic({ pictures }: { pictures: readonly [Picture, Picture] }) 
 
       <Tile className="aspect-square bg-ink p-6 text-ground lg:col-span-3 lg:col-start-7 lg:row-span-2 lg:row-start-4 lg:aspect-auto">
         <p className="text-head font-medium tabular-nums">460 g/m²</p>
-        <p className="mt-2 text-small">
-          The fleece of our Heavyweight Oversized Hoodie, the heaviest fabric we use.
-        </p>
+        <p className="mt-2 text-small">{home.heaviestFabric}</p>
       </Tile>
 
       <Tile className="aspect-square bg-sage p-6 lg:col-span-3 lg:col-start-10 lg:row-span-2 lg:row-start-4 lg:aspect-auto">
-        <p className="md:text-lead">Pre-washed jersey that keeps its shape and size.</p>
+        <p className="md:text-lead">{home.preWashed}</p>
       </Tile>
 
       <Tile className="col-span-2 bg-ecru p-6 md:col-span-1 lg:col-span-3 lg:col-start-1 lg:row-span-3 lg:row-start-6">
-        <p className="text-lead">Hoodies in soft fleece and French terry, with no logos.</p>
+        <p className="text-lead">{home.hoodies}</p>
       </Tile>
 
       <Tile className="col-span-2 bg-surface p-6 md:col-span-1 lg:col-span-3 lg:col-start-4 lg:row-span-3 lg:row-start-6">
-        <h3 className="font-medium">Caring for wool</h3>
+        <h3 className="font-medium">{home.woolCareTitle}</h3>
         <ul className="mt-2">
-          {WOOL_CARE.map((step) => (
+          {home.woolCare.map((step) => (
             <li key={step}>{step}</li>
           ))}
         </ul>

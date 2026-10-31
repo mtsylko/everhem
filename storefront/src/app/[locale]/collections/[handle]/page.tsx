@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Catalogue } from "@/components/catalogue";
+import { alternates } from "@/i18n/metadata";
+import { getDictionary, getLocale } from "@/i18n/server";
 import { getCollection, getCollections } from "@/lib/shopify/catalog";
 
 export async function generateStaticParams() {
@@ -11,18 +13,23 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/collections/[handle]">): Promise<Metadata> {
-  const collection = await getCollection((await params).handle);
+}: PageProps<"/[locale]/collections/[handle]">): Promise<Metadata> {
+  const { handle } = await params;
+  const collection = await getCollection(handle);
   if (!collection) return {};
   return {
     title: collection.seo.title ?? collection.title,
     description: collection.seo.description ?? collection.description,
+    alternates: alternates(await getLocale(), `/collections/${handle}`),
   };
 }
 
-export default function CollectionPage({ params }: PageProps<"/collections/[handle]">) {
+export default async function CollectionPage({
+  params,
+}: PageProps<"/[locale]/collections/[handle]">) {
+  const { loading } = await getDictionary();
   return (
-    <Suspense fallback={<p className="px-gutter py-section">Loading…</p>}>
+    <Suspense fallback={<p className="px-gutter py-section">{loading}</p>}>
       <CollectionDetails handle={params.then((p) => p.handle)} />
     </Suspense>
   );
