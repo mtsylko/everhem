@@ -12,3 +12,6 @@ node_modules
 
 # Codegen downloads the schema on each run
 seed/generated/*.schema.json
+
+# Working files of the design review
+.taste-skill/

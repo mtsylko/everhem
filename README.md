@@ -2,9 +2,12 @@
 
 A demo Shopify store for **Everhem**, a fictional brand of minimal everyday basics.
 
-This repository holds a seed script that fills a Shopify development store with a realistic
-clothing catalog through the Admin GraphQL API. A Next.js storefront built on the Storefront API
-is planned as the next step.
+This repository holds two parts:
+
+- **`seed/`** fills a Shopify development store with a realistic clothing catalog through the
+  Admin GraphQL API.
+- **`storefront/`** is a headless Next.js 16 store on the Storefront API: catalog, collection
+  and product pages, a cart, and Shopify's own checkout.
 
 ## What the seed creates
 
@@ -119,6 +122,50 @@ Operations are written inline with a `#graphql` tag. `npm run codegen -w seed` c
 the Admin API schema and generates types into `seed/generated/`. The client looks up response and
 variable types by the operation string, so a typo in a field name fails the typecheck.
 
+## Storefront
+
+### Setup
+
+The storefront reads the catalog with a Storefront API token from Shopify's **Headless** channel.
+
+1. **Install the [Headless](https://apps.shopify.com/headless) channel** on the store and click
+   **Create storefront**.
+2. **Copy the private token.** In the storefront's **Storefront API** settings, copy the
+   **private access token**. Its permissions need to cover reading products, collections and
+   metafields, and writing carts.
+3. **Fill in the environment.** Copy `storefront/.env.example` to `storefront/.env.local`, then
+   set the store domain and the private token.
+4. **Run the seed once more.** It publishes the catalog to the new Headless channel.
+
+### Commands
+
+```bash
+npm run dev                     # dev server on http://localhost:3000
+npm run build -w storefront     # production build
+npm run start -w storefront     # serve the production build
+```
+
+### How it works
+
+- **Pages are static, the cart is not.** With Cache Components, catalog reads are cached
+  functions (`"use cache"`, one `catalog` tag) and every page prerenders at build time. Only the
+  cart is read per request: it streams into the static shell inside Suspense.
+- **The cart lives in Shopify.** Its ID sits in an httpOnly cookie. Adding, changing and removing
+  lines are Server Actions that validate their input, call the Cart API and refresh the page. The
+  bag updates optimistically with `useOptimistic`, and checkout goes to the cart's `checkoutUrl`.
+- **The token stays on the server.** Every Storefront API request is made by Next.js with the
+  private token, never by the browser. Request-time calls send the shopper's IP in
+  `Shopify-Storefront-Buyer-IP`, so Shopify's bot protection sees shoppers, not one server.
+- **Link prefetches skip the cart.** Prefetches can read cookies, but they stop before Shopify
+  answers. `getCart` waits for `connection()`, so only a real visit reads the cart.
+- **The chosen variant is in the URL** (`?color=black&size=m`), so a link opens on that color and
+  size. Picking one updates the URL with `history.replaceState`, with no server round trip.
+- **Types come from codegen**, as in the seed: `npm run codegen -w storefront` checks every
+  query against the Storefront API schema.
+
+A development store keeps its password page, and Shopify's checkout shows it before the
+checkout. The password is in the admin under **Online Store → Preferences**.
+
 ## Project layout
 
 ```
@@ -134,15 +181,24 @@ seed/
 │   └── cli.ts
 ├── generated/          # GraphQL types from codegen
 └── test/
+storefront/
+├── src/
+│   ├── app/            # routes: home, collections/[handle], products/[handle]
+│   ├── components/     # tiles, catalogue grid, product picker, cart drawer, home sections
+│   └── lib/            # Storefront API client and queries, cart actions, variant logic, money
+├── generated/          # GraphQL types from codegen
+└── test/
 ```
 
 ## Development
 
 ```bash
-npm test                    # unit tests, no network
+npm test                          # unit tests, no network
 npm run typecheck
+npm run lint
 npm run format
-npm run codegen -w seed     # after changing a GraphQL operation
+npm run codegen -w seed           # after changing an Admin API operation
+npm run codegen -w storefront     # after changing a Storefront API operation
 ```
 
 Node runs the TypeScript files directly through type stripping, so there is no build step.

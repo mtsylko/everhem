@@ -2,3 +2,6 @@ node_modules
 package-lock.json
 seed/generated
 seed/catalog/images
+storefront/generated
+storefront/.next
+.taste-skill
