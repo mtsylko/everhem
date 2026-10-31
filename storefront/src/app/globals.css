@@ -89,21 +89,27 @@
     }
   }
 
+  /*
+   * The hero wall ends on whole rows of tiles, so no row shows as a sliver at its foot. It takes as
+   * many rows as fit in --wall-space, and no more than the --wall-rows it has.
+   */
+  .wall {
+    --wall-gap: 0.5rem;
+    --wall-row: calc(var(--tile) + var(--wall-gap));
+    height: calc(
+      min(
+          round(down, var(--wall-space) + var(--wall-gap), var(--wall-row)),
+          var(--wall-rows) * var(--wall-row)
+        ) -
+        var(--wall-gap)
+    );
+  }
+
   /* What the first screen holds rises in as the page loads, one step after another. */
   @media (prefers-reduced-motion: no-preference) {
     .enter {
       animation: rise 0.8s var(--ease-out-expo) both;
       animation-delay: calc(var(--enter-step, 0) * 80ms);
-    }
-  }
-
-  /* The hero wall drifts sideways, alternate rows in opposite directions. */
-  @media (prefers-reduced-motion: no-preference) {
-    .drift {
-      animation: drift 90s linear infinite;
-    }
-    .drift-reverse {
-      animation-direction: reverse;
     }
   }
 }
@@ -112,11 +118,5 @@
   from {
     opacity: 0;
     transform: translateY(24px);
-  }
-}
-
-@keyframes drift {
-  to {
-    transform: translateX(-50%);
   }
 }
