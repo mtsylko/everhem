@@ -6,7 +6,8 @@
   "author": "mtsylko",
   "license": "MIT",
   "workspaces": [
-    "seed"
+    "seed",
+    "storefront"
   ],
   "scripts": {
     "seed": "npm run seed -w seed --",
@@ -14,7 +15,9 @@
     "test": "npm test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "dev": "npm run dev -w storefront",
+    "lint": "npm run lint --workspaces --if-present"
   },
   "engines": {
     "node": ">=22.18"
