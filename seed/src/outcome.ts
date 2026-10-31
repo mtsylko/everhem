@@ -1,7 +1,7 @@
 import type { Logger } from "./logger.ts";
 import type { ShopifyClient } from "./shopify/client.ts";
 
-export type Resource = "product" | "collection" | "metafield-definition";
+export type Resource = "product" | "collection" | "metafield-definition" | "locale" | "translation";
 
 export type Action =
   "created" | "updated" | "skipped" | "deleted" | "would-create" | "would-update" | "would-delete";

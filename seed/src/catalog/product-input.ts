@@ -32,7 +32,9 @@ export function productChecksum(
   collectionId: string,
   imageHashes: Readonly<Record<string, string>>,
 ): string {
-  return checksum({ version: SEED_VERSION, product, collectionId, imageHashes });
+  // Translations sync in a step of their own, so a new translation doesn't resend the product.
+  const content = { ...product, translations: undefined };
+  return checksum({ version: SEED_VERSION, product: content, collectionId, imageHashes });
 }
 
 export function buildProductSetInput(

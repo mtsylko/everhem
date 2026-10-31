@@ -1,5 +1,13 @@
 import path from "node:path";
-import type { CatalogImage, CatalogProduct, ImageSource, ImageView } from "./types.ts";
+import type {
+  CatalogImage,
+  CatalogProduct,
+  Color,
+  ImageSource,
+  ImageView,
+  Translated,
+  TranslatedLocale,
+} from "./types.ts";
 
 export const IMAGES_PER_PRODUCT = 3;
 
@@ -54,6 +62,22 @@ export function planImages(product: CatalogProduct, imagesDir: string): PlannedI
       filename: `${product.handle}-${key}${extensionOf(image.source)}`,
     };
   });
+}
+
+const TRANSLATED_ALT: Translated<(title: string, color: string, view: ImageView) => string> = {
+  pl: (title, color, view) =>
+    `${title}, kolor ${color.toLowerCase()}, widok z ${view === "front" ? "przodu" : "tyłu"}`,
+};
+
+/** The alt text of a planned image in a translated language. */
+export function translatedAlt(
+  product: CatalogProduct,
+  image: PlannedImage,
+  palette: ReadonlyMap<string, Color>,
+  locale: TranslatedLocale,
+): string {
+  const color = palette.get(image.color)?.translations[locale] ?? image.color;
+  return TRANSLATED_ALT[locale](product.translations[locale].title, color, image.view);
 }
 
 /** The image shown when a shopper picks this color. */

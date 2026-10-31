@@ -55,4 +55,8 @@ export const REQUIRED_SCOPES = [
   "read_locations",
   "write_publications",
   "write_files",
+  "write_locales",
+  "write_translations",
+  // Lists the markets a new language is added to.
+  "read_markets",
 ] as const;
