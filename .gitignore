@@ -1,0 +1,14 @@
+node_modules
+.DS_Store
+
+# Local credentials
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+
+# Codegen downloads the schema on each run
+seed/generated/*.schema.json
