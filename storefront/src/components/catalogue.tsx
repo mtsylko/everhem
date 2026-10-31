@@ -19,7 +19,7 @@ export function Catalogue({ products, enterFrom }: CatalogueProps) {
   );
 
   return (
-    <ul className="grid grid-flow-dense grid-cols-2 gap-x-2 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
+    <ul className="grid grid-flow-dense grid-cols-2 gap-x-2 md:grid-cols-3 lg:grid-cols-4">
       {ordered.map((product, index) => (
         <ProductTile
           key={product.id}

@@ -16,7 +16,13 @@ interface ProductTileProps {
   enterStep?: number;
 }
 
-/** A product as a specimen: alone on a flat field, named plainly, one fact beneath. */
+/**
+ * A product as a specimen: alone on a flat field, named plainly, one fact beneath.
+ *
+ * Each tile is a subgrid over two of its list's rows, picture and caption, so a row's pictures end
+ * on one line and its captions start on one. A double tile's picture runs down to the foot of the
+ * second row's pictures. The tile brings its own space beneath, so its list has no row gap.
+ */
 export function ProductTile({
   product,
   index,
@@ -33,11 +39,21 @@ export function ProductTile({
 
   return (
     <li
-      className={`${enterStep === undefined ? "rise" : "enter"} ${double ? "col-span-2 row-span-2" : ""}`}
+      className={`${enterStep === undefined ? "rise" : "enter"} grid grid-rows-subgrid pb-8 ${double ? "col-span-2 row-span-4" : "row-span-2"}`}
       style={enterStep === undefined ? undefined : ({ "--enter-step": enterStep } as CSSProperties)}
     >
-      <Link href={`/products/${product.handle}`} className="group block">
-        <div className={`relative aspect-[4/5] overflow-hidden ${fieldFor(index)}`}>
+      <Link
+        href={`/products/${product.handle}`}
+        className="group row-span-full grid grid-rows-subgrid"
+      >
+        {/*
+          A double picture keeps its 4:5 when nothing sits beside it, and stretches when tiles do.
+          Stretched, it is taller than the photo, so the photo is fitted whole, not cropped at the sleeves,
+          and the margins take the photo's own ground, so they blend into the field the same way.
+        */}
+        <div
+          className={`relative aspect-[4/5] overflow-hidden ${double ? "row-span-3 place-self-stretch" : ""} ${fieldFor(index)}`}
+        >
           {front && (
             <Image
               src={front.url}
@@ -45,7 +61,7 @@ export function ProductTile({
               fill
               sizes={sizes}
               loading={eager ? "eager" : "lazy"}
-              className="object-cover mix-blend-multiply transition-transform duration-500 ease-out-expo group-hover:scale-[1.04]"
+              className={`${double ? "object-contain bg-backdrop" : "object-cover"} mix-blend-multiply transition-transform duration-500 ease-out-expo group-hover:scale-[1.04]`}
             />
           )}
           {!product.availableForSale && (
@@ -54,18 +70,19 @@ export function ProductTile({
             </p>
           )}
         </div>
-        <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-4">
+        <div className="pt-3">
           <h3 className="font-medium underline-offset-4 group-hover:underline">{product.title}</h3>
           <Price
             price={product.priceRange.minVariantPrice}
             compareAt={product.compareAtPriceRange.maxVariantPrice}
-            className="shrink-0 tabular-nums"
+            className="tabular-nums"
           />
+          {/* The colour count holds on to the fabric's last word, so it never wraps alone. */}
+          <p className="mt-1 text-small text-pretty text-muted">
+            {product.fabric?.value}
+            {colours && colours > 1 ? `\u00a0·\u00a0${colours}\u00a0colours` : null}
+          </p>
         </div>
-        <p className="text-small text-muted">
-          {product.fabric?.value}
-          {colours && colours > 1 ? ` · ${colours} colours` : null}
-        </p>
       </Link>
     </li>
   );

@@ -151,7 +151,7 @@ async function Related({
       <h2 id="related-title" className="rise mb-8 text-head font-medium">
         More {collection.title.toLowerCase()}
       </h2>
-      <ul className="grid grid-cols-2 gap-x-2 gap-y-8 lg:grid-cols-4">
+      <ul className="grid grid-cols-2 gap-x-2 lg:grid-cols-4">
         {products.map((product, index) => (
           <ProductTile key={product.id} product={product} index={index + 1} />
         ))}
