@@ -46,6 +46,7 @@ export const products: readonly CatalogProduct[] = [
         { color: "Heather Grey", size: "XL" },
       ],
     },
+    featured: "Bestseller",
     tags: ["organic-cotton", "bestseller"],
   },
   {
@@ -132,6 +133,7 @@ export const products: readonly CatalogProduct[] = [
     fabric: "100% organic cotton, 330 g/m² loopback",
     care: fleeceCare,
     stock: { kind: "in-stock" },
+    featured: "New",
     tags: ["organic-cotton"],
   },
   {
@@ -220,6 +222,7 @@ export const products: readonly CatalogProduct[] = [
         { color: "Oatmeal", size: "XL" },
       ],
     },
+    featured: "Staff pick",
     tags: ["cashmere", "sale"],
   },
   {

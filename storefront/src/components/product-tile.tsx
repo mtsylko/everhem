@@ -33,6 +33,8 @@ export function ProductTile({
   // Only the first picture: the next ones are mostly other colours, which would read as a recolour.
   const [front] = product.images.nodes;
   const colours = product.options.find((option) => option.name === "Color")?.optionValues.length;
+  // A sold-out piece says so; one that can be bought says why it's featured, if it is.
+  const label = product.availableForSale ? product.featured?.value : "Sold out";
   const sizes = double
     ? "(min-width: 1024px) 50vw, (min-width: 768px) 66vw, 100vw"
     : "(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw";
@@ -64,9 +66,11 @@ export function ProductTile({
               className={`${double ? "object-contain bg-backdrop" : "object-cover"} mix-blend-multiply transition-transform duration-500 ease-out-expo group-hover:scale-[1.04]`}
             />
           )}
-          {!product.availableForSale && (
-            <p className="absolute top-3 left-3 bg-ink px-2 py-1 text-small text-ground">
-              Sold out
+          {label && (
+            <p
+              className={`absolute top-3 left-3 px-2 py-1 text-small ${product.availableForSale ? "bg-ground" : "bg-ink text-ground"}`}
+            >
+              {label}
             </p>
           )}
         </div>

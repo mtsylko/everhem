@@ -17,7 +17,8 @@ This repository holds two parts:
 - SKUs such as `HEM-ECT-BLK-M`, and stock at the store's main location
 - 3 sold-out products, plus some sold-out sizes in other products
 - 3 images per product, with the right image linked to each color
-- Product metafields for fabric composition and care instructions, readable from the Storefront API
+- Product metafields for fabric composition, care instructions and the reason a product is
+  featured (New, Bestseller or Staff pick), readable from the Storefront API
 - Publishing of every product and collection to all of the store's sales channels. A channel
   added later, such as Headless, gets everything on the next run.
 
@@ -56,13 +57,13 @@ A run logs one event per resource and ends with a summary. For example:
 01:38:52 INFO  product.created handle=essential-crew-tee id=gid://shopify/Product/16752147333465 images=3
 01:38:52 INFO  product.published handle=essential-crew-tee publications=["Online Store","Shop","Point of Sale"]
 ...
-01:38:59 INFO  run.summary durationMs=12367 metafield-definition={"created":2} collection={"created":3} product={"created":12}
+01:38:59 INFO  run.summary durationMs=12367 metafield-definition={"created":3} collection={"created":3} product={"created":12}
 ```
 
 A second run changes nothing and takes about a second:
 
 ```
-01:39:48 INFO  run.summary durationMs=1286 metafield-definition={"skipped":2} collection={"skipped":3} product={"skipped":12}
+01:39:48 INFO  run.summary durationMs=1286 metafield-definition={"skipped":3} collection={"skipped":3} product={"skipped":12}
 ```
 
 Logs are readable lines in a terminal and JSON lines elsewhere. Set `LOG_FORMAT=json` or
@@ -160,6 +161,9 @@ npm run start -w storefront     # serve the production build
   answers. `getCart` waits for `connection()`, so only a real visit reads the cart.
 - **The chosen variant is in the URL** (`?color=black&size=m`), so a link opens on that color and
   size. Picking one updates the URL with `history.replaceState`, with no server round trip.
+- **Merchandising comes from the admin.** A product with an `everhem.featured` value takes one of
+  the grid's double tiles, labelled with that reason. Featured products fill every seventh place,
+  and a sold-out one stays single.
 - **Types come from codegen**, as in the seed: `npm run codegen -w storefront` checks every
   query against the Storefront API schema.
 

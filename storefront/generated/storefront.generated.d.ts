@@ -245,6 +245,7 @@ export type ProductsQuery = {
           }
         >;
         fabric?: StorefrontTypes.Maybe<Pick<StorefrontTypes.Metafield, "value">>;
+        featured?: StorefrontTypes.Maybe<Pick<StorefrontTypes.Metafield, "value">>;
       }
     >;
   };
@@ -276,6 +277,7 @@ export type CollectionQuery = {
               }
             >;
             fabric?: StorefrontTypes.Maybe<Pick<StorefrontTypes.Metafield, "value">>;
+            featured?: StorefrontTypes.Maybe<Pick<StorefrontTypes.Metafield, "value">>;
           }
         >;
       };
@@ -377,6 +379,7 @@ export type ProductCardFragment = Pick<
     }
   >;
   fabric?: StorefrontTypes.Maybe<Pick<StorefrontTypes.Metafield, "value">>;
+  featured?: StorefrontTypes.Maybe<Pick<StorefrontTypes.Metafield, "value">>;
 };
 
 export type CartFragment = Pick<StorefrontTypes.Cart, "id" | "checkoutUrl" | "totalQuantity"> & {
@@ -416,15 +419,15 @@ interface GeneratedQueryTypes {
     return: CollectionsQuery;
     variables: CollectionsQueryVariables;
   };
-  '#graphql\n  query Products($first: Int!, $sortKey: ProductSortKeys) {\n    products(first: $first, sortKey: $sortKey) {\n      nodes {\n        ...ProductCard\n      }\n    }\n  }\n  #graphql\n  fragment ProductCard on Product {\n    id\n    handle\n    title\n    availableForSale\n    images(first: 3) {\n      nodes {\n        ...Image\n      }\n    }\n    priceRange {\n      minVariantPrice {\n        ...Money\n      }\n    }\n    compareAtPriceRange {\n      maxVariantPrice {\n        ...Money\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    fabric: metafield(namespace: "everhem", key: "fabric") {\n      value\n    }\n  }\n\n  #graphql\n  fragment Image on Image {\n    url\n    altText\n    width\n    height\n  }\n\n  #graphql\n  fragment Money on MoneyV2 {\n    amount\n    currencyCode\n  }\n\n': {
+  '#graphql\n  query Products($first: Int!, $sortKey: ProductSortKeys) {\n    products(first: $first, sortKey: $sortKey) {\n      nodes {\n        ...ProductCard\n      }\n    }\n  }\n  #graphql\n  fragment ProductCard on Product {\n    id\n    handle\n    title\n    availableForSale\n    images(first: 3) {\n      nodes {\n        ...Image\n      }\n    }\n    priceRange {\n      minVariantPrice {\n        ...Money\n      }\n    }\n    compareAtPriceRange {\n      maxVariantPrice {\n        ...Money\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    fabric: metafield(namespace: "everhem", key: "fabric") {\n      value\n    }\n    featured: metafield(namespace: "everhem", key: "featured") {\n      value\n    }\n  }\n\n  #graphql\n  fragment Image on Image {\n    url\n    altText\n    width\n    height\n  }\n\n  #graphql\n  fragment Money on MoneyV2 {\n    amount\n    currencyCode\n  }\n\n': {
     return: ProductsQuery;
     variables: ProductsQueryVariables;
   };
-  '#graphql\n  query Collection($handle: String!) {\n    collection(handle: $handle) {\n      handle\n      title\n      description\n      descriptionHtml\n      seo {\n        title\n        description\n      }\n      products(first: 100, sortKey: COLLECTION_DEFAULT) {\n        nodes {\n          ...ProductCard\n        }\n      }\n    }\n  }\n  #graphql\n  fragment ProductCard on Product {\n    id\n    handle\n    title\n    availableForSale\n    images(first: 3) {\n      nodes {\n        ...Image\n      }\n    }\n    priceRange {\n      minVariantPrice {\n        ...Money\n      }\n    }\n    compareAtPriceRange {\n      maxVariantPrice {\n        ...Money\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    fabric: metafield(namespace: "everhem", key: "fabric") {\n      value\n    }\n  }\n\n  #graphql\n  fragment Image on Image {\n    url\n    altText\n    width\n    height\n  }\n\n  #graphql\n  fragment Money on MoneyV2 {\n    amount\n    currencyCode\n  }\n\n': {
+  '#graphql\n  query Collection($handle: String!) {\n    collection(handle: $handle) {\n      handle\n      title\n      description\n      descriptionHtml\n      seo {\n        title\n        description\n      }\n      products(first: 100, sortKey: COLLECTION_DEFAULT) {\n        nodes {\n          ...ProductCard\n        }\n      }\n    }\n  }\n  #graphql\n  fragment ProductCard on Product {\n    id\n    handle\n    title\n    availableForSale\n    images(first: 3) {\n      nodes {\n        ...Image\n      }\n    }\n    priceRange {\n      minVariantPrice {\n        ...Money\n      }\n    }\n    compareAtPriceRange {\n      maxVariantPrice {\n        ...Money\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    fabric: metafield(namespace: "everhem", key: "fabric") {\n      value\n    }\n    featured: metafield(namespace: "everhem", key: "featured") {\n      value\n    }\n  }\n\n  #graphql\n  fragment Image on Image {\n    url\n    altText\n    width\n    height\n  }\n\n  #graphql\n  fragment Money on MoneyV2 {\n    amount\n    currencyCode\n  }\n\n': {
     return: CollectionQuery;
     variables: CollectionQueryVariables;
   };
-  '#graphql\n  query Product($handle: String!) {\n    product(handle: $handle) {\n      id\n      handle\n      title\n      description\n      descriptionHtml\n      availableForSale\n      seo {\n        title\n        description\n      }\n      images(first: 20) {\n        nodes {\n          ...Image\n        }\n      }\n      priceRange {\n        minVariantPrice {\n          ...Money\n        }\n      }\n      compareAtPriceRange {\n        maxVariantPrice {\n          ...Money\n        }\n      }\n      options {\n        name\n        optionValues {\n          name\n          swatch {\n            color\n          }\n        }\n      }\n      variants(first: 100) {\n        nodes {\n          id\n          sku\n          availableForSale\n          selectedOptions {\n            name\n            value\n          }\n          image {\n            ...Image\n          }\n          price {\n            ...Money\n          }\n          compareAtPrice {\n            ...Money\n          }\n        }\n      }\n      fabric: metafield(namespace: "everhem", key: "fabric") {\n        value\n      }\n      care: metafield(namespace: "everhem", key: "care") {\n        value\n      }\n      collections(first: 1) {\n        nodes {\n          handle\n          title\n        }\n      }\n    }\n  }\n  #graphql\n  fragment Image on Image {\n    url\n    altText\n    width\n    height\n  }\n\n  #graphql\n  fragment Money on MoneyV2 {\n    amount\n    currencyCode\n  }\n\n': {
+  '#graphql\n  query Product($handle: String!) {\n    product(handle: $handle) {\n      id\n      handle\n      title\n      description\n      descriptionHtml\n      availableForSale\n      seo {\n        title\n        description\n      }\n      images(first: 20) {\n        nodes {\n          ...Image\n        }\n      }\n      priceRange {\n        minVariantPrice {\n          ...Money\n        }\n      }\n      compareAtPriceRange {\n        maxVariantPrice {\n          ...Money\n        }\n      }\n      options {\n        name\n        optionValues {\n          name\n          swatch {\n            color\n          }\n        }\n      }\n      variants(first: 100) {\n        nodes {\n          id\n          sku\n          availableForSale\n          selectedOptions {\n            name\n            value\n          }\n          image {\n            ...Image\n          }\n          price {\n            ...Money\n          }\n          compareAtPrice {\n            ...Money\n          }\n        }\n      }\n      fabric: metafield(namespace: "everhem", key: "fabric") {\n        value\n      }\n      care: metafield(namespace: "everhem", key: "care") {\n        value\n      }\n      collections(first: 5) {\n        nodes {\n          handle\n          title\n        }\n      }\n    }\n  }\n  #graphql\n  fragment Image on Image {\n    url\n    altText\n    width\n    height\n  }\n\n  #graphql\n  fragment Money on MoneyV2 {\n    amount\n    currencyCode\n  }\n\n': {
     return: ProductQuery;
     variables: ProductQueryVariables;
   };

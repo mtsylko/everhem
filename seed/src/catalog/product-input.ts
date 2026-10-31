@@ -79,6 +79,8 @@ export function buildProductSetInput(
     metafields: [
       metafield(PRODUCT_METAFIELDS.fabric, product.fabric),
       metafield(PRODUCT_METAFIELDS.care, JSON.stringify(product.care)),
+      // productSet deletes the metafields it isn't given, so leaving this out clears an old label.
+      ...(product.featured ? [metafield(PRODUCT_METAFIELDS.featured, product.featured)] : []),
       metafield(CHECKSUM_METAFIELD, ctx.checksum),
     ],
   };

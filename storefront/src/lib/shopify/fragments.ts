@@ -47,6 +47,9 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
     fabric: metafield(namespace: "everhem", key: "fabric") {
       value
     }
+    featured: metafield(namespace: "everhem", key: "featured") {
+      value
+    }
   }
 `;
 
