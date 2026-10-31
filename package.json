@@ -1,0 +1,25 @@
+{
+  "name": "everhem",
+  "private": true,
+  "type": "module",
+  "description": "Demo Shopify store for Everhem, a minimal everyday basics brand",
+  "author": "mtsylko",
+  "license": "MIT",
+  "workspaces": [
+    "seed"
+  ],
+  "scripts": {
+    "seed": "npm run seed -w seed --",
+    "teardown": "npm run teardown -w seed --",
+    "test": "npm test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10"
+  }
+}
