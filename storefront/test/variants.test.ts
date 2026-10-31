@@ -5,6 +5,7 @@ import {
   resolveSelection,
   selectedVariant,
   selectionToParams,
+  slugify,
   type VariantLike,
 } from "../src/lib/product/variants";
 
@@ -66,6 +67,19 @@ describe("selectionToParams", () => {
   it("round-trips through resolveSelection", () => {
     const selection = { Color: "Heather Grey", Size: "S" };
     expect(resolveSelection(options, variants, selectionToParams(selection))).toEqual(selection);
+  });
+});
+
+describe("slugify", () => {
+  it("spells Polish colour names in plain letters", () => {
+    expect(slugify("Złamana biel")).toBe("zlamana-biel");
+    expect(slugify("Szary melanż")).toBe("szary-melanz");
+    expect(slugify("Pudrowy błękit")).toBe("pudrowy-blekit");
+  });
+
+  it("keeps English names as they were", () => {
+    expect(slugify("Off-White")).toBe("off-white");
+    expect(slugify("Heather Grey")).toBe("heather-grey");
   });
 });
 

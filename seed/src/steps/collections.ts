@@ -79,7 +79,11 @@ async function syncCollection(ctx: RunContext, store: Store, collection: Catalog
   });
   if (existing && !existing.seedChecksum) throw new NotOwnedError("collection", collection.handle);
 
-  const sum = checksum({ version: SEED_VERSION, collection });
+  // Translations sync in a step of their own, so a new translation doesn't resend the collection.
+  const sum = checksum({
+    version: SEED_VERSION,
+    collection: { ...collection, translations: undefined },
+  });
   const fields = {
     title: collection.title,
     handle: collection.handle,

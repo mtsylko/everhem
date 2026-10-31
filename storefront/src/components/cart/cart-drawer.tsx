@@ -3,13 +3,18 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense, use, useEffect, useOptimistic, useRef, useState, useTransition } from "react";
+import { format } from "@/i18n/format";
+import { useI18n } from "@/i18n/i18n-context";
+import { localePath } from "@/i18n/locales";
 import { setLineQuantity } from "@/lib/cart/actions";
+import { selectionToParams } from "@/lib/product/variants";
 import { formatMoney } from "@/lib/money";
 import type { CartLine } from "@/lib/shopify/cart";
 import { useCart } from "./cart-context";
 
 export function CartDrawer() {
   const { isOpen, close } = useCart();
+  const { cart } = useI18n().dictionary;
   const dialog = useRef<HTMLDialogElement>(null);
 
   // A modal <dialog> traps focus, closes on Escape and makes the page behind it inert.
@@ -33,14 +38,14 @@ export function CartDrawer() {
       <div className="flex w-full flex-col">
         <div className="flex items-baseline justify-between px-gutter pt-6 pb-4">
           <h2 id="cart-title" className="text-lead font-medium">
-            Your bag
+            {cart.title}
           </h2>
           <button type="button" onClick={close} className="underline-offset-4 hover:underline">
-            Close
+            {cart.close}
           </button>
         </div>
         {isOpen && (
-          <Suspense fallback={<p className="px-gutter">Loading your bag…</p>}>
+          <Suspense fallback={<p className="px-gutter">{cart.loading}</p>}>
             <CartContents />
           </Suspense>
         )}
@@ -53,6 +58,7 @@ type QuantityChange = { lineId: string; quantity: number };
 
 function CartContents() {
   const { cartPromise, close } = useCart();
+  const { locale, dictionary } = useI18n();
   const cart = use(cartPromise);
   const [lines, setOptimisticLines] = useOptimistic(
     cart?.lines.nodes ?? [],
@@ -68,7 +74,7 @@ function CartContents() {
     setNotice(null);
     startTransition(async () => {
       setOptimisticLines({ lineId, quantity });
-      const result = await setLineQuantity(lineId, quantity);
+      const result = await setLineQuantity(lineId, quantity, locale);
       setNotice(result.notice);
     });
   }
@@ -76,13 +82,13 @@ function CartContents() {
   if (!cart || lines.length === 0) {
     return (
       <div className="px-gutter">
-        <p>Your bag is empty.</p>
+        <p>{dictionary.cart.empty}</p>
         <Link
-          href="/#catalogue"
+          href={localePath(locale, "/#catalogue")}
           onClick={close}
           className="mt-6 inline-block bg-ink px-6 py-3 font-medium text-ground transition-colors hover:bg-accent active:scale-[0.98]"
         >
-          Shop the basics
+          {dictionary.shopTheBasics}
         </Link>
       </div>
     );
@@ -102,18 +108,18 @@ function CartContents() {
           </p>
         )}
         <dl className="flex items-baseline justify-between text-lead">
-          <dt>Subtotal</dt>
+          <dt>{dictionary.cart.subtotal}</dt>
           <dd className={`tabular-nums ${isPending ? "opacity-50" : ""}`}>
             {formatMoney(subtotal(lines, cart.cost.subtotalAmount.currencyCode))}
           </dd>
         </dl>
-        <p className="mt-1 text-small text-muted">Shipping and taxes are added at checkout.</p>
+        <p className="mt-1 text-small text-muted">{dictionary.cart.taxesAtCheckout}</p>
         <a
           href={cart.checkoutUrl}
           aria-disabled={isPending}
           className="mt-5 block bg-accent px-6 py-4 text-center font-medium text-accent-ink transition-colors hover:bg-accent-strong active:scale-[0.98] aria-disabled:pointer-events-none aria-disabled:opacity-60"
         >
-          Check out
+          {dictionary.cart.checkOut}
         </a>
       </div>
     </>
@@ -129,9 +135,12 @@ function CartLineItem({
   onQuantity: (lineId: string, quantity: number) => void;
   onNavigate: () => void;
 }) {
+  const { locale, dictionary } = useI18n();
+  const words = dictionary.cart;
   const { product, image, selectedOptions } = line.merchandise;
-  const params = new URLSearchParams(
-    selectedOptions.map((option) => [option.name.toLowerCase(), option.value.toLowerCase()]),
+  // The same slugs the product page reads, e.g. ?color=heather-grey&size=m.
+  const params = selectionToParams(
+    Object.fromEntries(selectedOptions.map((option) => [option.name, option.value])),
   );
   const label = selectedOptions.map((option) => option.value).join(" · ");
 
@@ -151,7 +160,7 @@ function CartLineItem({
       <div className="flex flex-1 flex-col">
         <div className="flex items-baseline justify-between gap-4">
           <Link
-            href={`/products/${product.handle}?${params}`}
+            href={`${localePath(locale, `/products/${product.handle}`)}?${params}`}
             onClick={onNavigate}
             className="font-medium underline-offset-4 hover:underline"
           >
@@ -162,17 +171,17 @@ function CartLineItem({
         <p className="text-small text-muted">{label}</p>
         <div className="mt-auto flex items-center gap-1">
           <QuantityButton
-            label={`One fewer ${product.title}`}
+            label={format(words.oneFewer, { title: product.title })}
             onClick={() => onQuantity(line.id, line.quantity - 1)}
           >
             −
           </QuantityButton>
           <span className="w-8 text-center tabular-nums">
-            <span className="sr-only">Quantity </span>
+            <span className="sr-only">{words.quantity} </span>
             {line.quantity}
           </span>
           <QuantityButton
-            label={`One more ${product.title}`}
+            label={format(words.oneMore, { title: product.title })}
             onClick={() => onQuantity(line.id, line.quantity + 1)}
           >
             +
@@ -182,7 +191,7 @@ function CartLineItem({
             onClick={() => onQuantity(line.id, 0)}
             className="ml-auto text-small text-muted underline-offset-4 hover:text-ink hover:underline"
           >
-            Remove
+            {words.remove}
           </button>
         </div>
       </div>

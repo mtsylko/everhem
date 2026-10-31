@@ -1,9 +1,10 @@
 import "server-only";
+import { languageCode, type Locale } from "@/i18n/locales";
 import { storefront, type RequestOptions } from "./client";
 import { CART_FRAGMENT, IMAGE_FRAGMENT, MONEY_FRAGMENT } from "./fragments";
 
 const CART_QUERY = `#graphql
-  query Cart($cartId: ID!) {
+  query Cart($cartId: ID!, $language: LanguageCode) @inContext(language: $language) {
     cart(id: $cartId) {
       ...Cart
     }
@@ -14,7 +15,8 @@ const CART_QUERY = `#graphql
 `;
 
 const CART_CREATE = `#graphql
-  mutation CartCreate($lines: [CartLineInput!]!) {
+  mutation CartCreate($lines: [CartLineInput!]!, $language: LanguageCode)
+  @inContext(language: $language) {
     cartCreate(input: { lines: $lines }) {
       cart {
         ...Cart
@@ -33,7 +35,8 @@ const CART_CREATE = `#graphql
 `;
 
 const CART_LINES_ADD = `#graphql
-  mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+  mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!, $language: LanguageCode)
+  @inContext(language: $language) {
     cartLinesAdd(cartId: $cartId, lines: $lines) {
       cart {
         ...Cart
@@ -52,7 +55,11 @@ const CART_LINES_ADD = `#graphql
 `;
 
 const CART_LINES_UPDATE = `#graphql
-  mutation CartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+  mutation CartLinesUpdate(
+    $cartId: ID!
+    $lines: [CartLineUpdateInput!]!
+    $language: LanguageCode
+  ) @inContext(language: $language) {
     cartLinesUpdate(cartId: $cartId, lines: $lines) {
       cart {
         ...Cart
@@ -71,7 +78,8 @@ const CART_LINES_UPDATE = `#graphql
 `;
 
 const CART_LINES_REMOVE = `#graphql
-  mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+  mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!, $language: LanguageCode)
+  @inContext(language: $language) {
     cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
       cart {
         ...Cart
@@ -88,6 +96,11 @@ const CART_LINES_REMOVE = `#graphql
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
 `;
+
+export interface CartRequestOptions extends RequestOptions {
+  /** Shopify answers in this language, and a new cart's checkout opens in it. */
+  locale: Locale;
+}
 
 interface CartPayload<C> {
   cart?: C | null;
@@ -107,8 +120,12 @@ function unwrap<C>(payload: CartPayload<C> | null | undefined): CartMutationResu
   return { cart: payload?.cart ?? null, notice: notice ?? null };
 }
 
-export async function fetchCart(cartId: string, options?: RequestOptions) {
-  const { cart } = await storefront(CART_QUERY, { cartId }, options);
+export async function fetchCart(cartId: string, options: CartRequestOptions) {
+  const { cart } = await storefront(
+    CART_QUERY,
+    { cartId, language: languageCode(options.locale) },
+    options,
+  );
   return cart ?? null;
 }
 
@@ -118,11 +135,11 @@ export type CartLine = Cart["lines"]["nodes"][number];
 export async function createCart(
   merchandiseId: string,
   quantity: number,
-  options?: RequestOptions,
+  options: CartRequestOptions,
 ) {
   const { cartCreate } = await storefront(
     CART_CREATE,
-    { lines: [{ merchandiseId, quantity }] },
+    { lines: [{ merchandiseId, quantity }], language: languageCode(options.locale) },
     options,
   );
   return unwrap(cartCreate);
@@ -132,11 +149,11 @@ export async function addCartLines(
   cartId: string,
   merchandiseId: string,
   quantity: number,
-  options?: RequestOptions,
+  options: CartRequestOptions,
 ) {
   const { cartLinesAdd } = await storefront(
     CART_LINES_ADD,
-    { cartId, lines: [{ merchandiseId, quantity }] },
+    { cartId, lines: [{ merchandiseId, quantity }], language: languageCode(options.locale) },
     options,
   );
   return unwrap(cartLinesAdd);
@@ -146,20 +163,20 @@ export async function updateCartLine(
   cartId: string,
   lineId: string,
   quantity: number,
-  options?: RequestOptions,
+  options: CartRequestOptions,
 ) {
   const { cartLinesUpdate } = await storefront(
     CART_LINES_UPDATE,
-    { cartId, lines: [{ id: lineId, quantity }] },
+    { cartId, lines: [{ id: lineId, quantity }], language: languageCode(options.locale) },
     options,
   );
   return unwrap(cartLinesUpdate);
 }
 
-export async function removeCartLine(cartId: string, lineId: string, options?: RequestOptions) {
+export async function removeCartLine(cartId: string, lineId: string, options: CartRequestOptions) {
   const { cartLinesRemove } = await storefront(
     CART_LINES_REMOVE,
-    { cartId, lineIds: [lineId] },
+    { cartId, lineIds: [lineId], language: languageCode(options.locale) },
     options,
   );
   return unwrap(cartLinesRemove);

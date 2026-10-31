@@ -17,9 +17,13 @@ This repository holds two parts:
 - SKUs such as `HEM-ECT-BLK-M`, and stock at the store's main location
 - 3 sold-out products, plus some sold-out sizes in other products
 - 3 images per product, with the right image linked to each color
-- Product metafields for fabric composition and care instructions, readable from the Storefront API
+- Product metafields for fabric composition, care instructions and the reason a product is
+  featured (New, Bestseller or Staff pick), readable from the Storefront API
 - Publishing of every product and collection to all of the store's sales channels. A channel
   added later, such as Headless, gets everything on the next run.
+- Polish as a second store language: turned on, published, and added to the markets that sell in
+  English, with a translation of every product, collection, colour, fabric, care step and image
+  alt text
 
 ## Setup
 
@@ -27,7 +31,8 @@ You need Node.js 22.18 or newer (`nvm use` reads `.nvmrc`) and a Shopify develop
 
 1. **Create an app in the [Dev Dashboard](https://dev.shopify.com).** It needs no code. Give it
    these Admin API scopes: `write_products`, `write_inventory`, `read_locations`,
-   `write_publications` and `write_files`. Release a version and install the app on your store.
+   `write_publications`, `write_files`, `write_locales`, `write_translations` and `read_markets`.
+   Release a version and install the app on your store.
 2. **Copy the credentials.** Copy `seed/.env.example` to `seed/.env`, then fill in the store
    domain and the app's client ID and secret.
 3. **Set the store currency to PLN.** The seed checks this before it changes anything.
@@ -56,13 +61,13 @@ A run logs one event per resource and ends with a summary. For example:
 01:38:52 INFO  product.created handle=essential-crew-tee id=gid://shopify/Product/16752147333465 images=3
 01:38:52 INFO  product.published handle=essential-crew-tee publications=["Online Store","Shop","Point of Sale"]
 ...
-01:38:59 INFO  run.summary durationMs=12367 metafield-definition={"created":2} collection={"created":3} product={"created":12}
+01:38:59 INFO  run.summary durationMs=12367 metafield-definition={"created":3} collection={"created":3} product={"created":12}
 ```
 
 A second run changes nothing and takes about a second:
 
 ```
-01:39:48 INFO  run.summary durationMs=1286 metafield-definition={"skipped":2} collection={"skipped":3} product={"skipped":12}
+01:39:48 INFO  run.summary durationMs=1286 metafield-definition={"skipped":3} collection={"skipped":3} product={"skipped":12}
 ```
 
 Logs are readable lines in a terminal and JSON lines elsewhere. Set `LOG_FORMAT=json` or
@@ -82,7 +87,22 @@ Logs are readable lines in a terminal and JSON lines elsewhere. Set `LOG_FORMAT=
   `productSet` deletes the old files it no longer lists.
 - **Teardown only deletes what the seed created.** A resource needs both the `everhem-seed` tag
   and the checksum metafield to count. If the store already has a product or collection with a
-  catalog handle, the seed stops instead of overwriting it.
+  catalog handle, the seed stops instead of overwriting it. Translations go with their products;
+  the Polish language stays on, since it is a store setting.
+
+### Translations
+
+The Polish text lives next to the English in `seed/catalog/`, under each product's, collection's
+and colour's `translations`. It goes into the store through Shopify's own translations
+(`translationsRegister`), so the Storefront API returns it to any client that asks for Polish, and
+checkout and order emails can use it too.
+
+- **Translations run after the products.** Each one is tied to the English text it translates by
+  a digest of that text, so the English has to be in the store first.
+- **Unchanged translations are skipped.** The seed reads the store's translations and registers
+  only the ones that differ, or that Shopify marks outdated because the English changed.
+- **Option names stay English.** Colour values are translated, but the option is still called
+  `Color`, which the storefront matches on.
 
 ### Rate limits
 
@@ -160,8 +180,29 @@ npm run start -w storefront     # serve the production build
   answers. `getCart` waits for `connection()`, so only a real visit reads the cart.
 - **The chosen variant is in the URL** (`?color=black&size=m`), so a link opens on that color and
   size. Picking one updates the URL with `history.replaceState`, with no server round trip.
+- **Merchandising comes from the admin.** A product with an `everhem.featured` value takes one of
+  the grid's double tiles, labelled with that reason. Featured products fill every seventh place,
+  and a sold-out one stays single.
 - **Types come from codegen**, as in the seed: `npm run codegen -w storefront` checks every
   query against the Storefront API schema.
+
+### Languages
+
+The storefront is in English and Polish: `/en/...` and `/pl/...`.
+
+- **Every page prerenders once per language.** The language is the first URL segment, and the
+  root layout sits under it (`app/[locale]`). Any Server Component reads it with
+  `next/root-params`, and inside `"use cache"` it becomes part of the cache key.
+- **A URL without a language is redirected.** The proxy picks the language the shopper chose
+  before (a cookie set by the switcher), or else the first one their browser asks for.
+- **Catalogue text comes from Shopify.** Every query runs `@inContext(language:)`, so Shopify
+  answers with the seed's translations and falls back to English where there are none. A cart is
+  created in the page's language, so its checkout is too.
+- **The storefront's own words are in dictionaries** (`src/i18n/dictionaries`), typed against the
+  English one, with Polish plural forms picked by `Intl.PluralRules`. Client Components get the
+  page's dictionary through context; Server Actions are given the locale as an argument.
+- **Search engines see each language.** Pages link their other language with `hreflang`. Set
+  `SITE_URL` in `.env.local` so those links are absolute and point at the real site.
 
 A development store keeps its password page, and Shopify's checkout shows it before the
 checkout. The password is in the admin under **Online Store → Preferences**.
@@ -170,12 +211,13 @@ checkout. The password is in the admin under **Online Store → Preferences**.
 
 ```
 seed/
-├── catalog/            # the Everhem catalog: colors, collections, products, images
+├── catalog/            # the Everhem catalog, in English and Polish: colors, collections, products, images
 ├── scripts/            # placeholder image renderer (PNG encoder and rasterizer)
 ├── src/
-│   ├── catalog/        # pure functions: variants, stock, images, checksums, productSet input
+│   ├── catalog/        # pure functions: variants, stock, images, checksums, productSet input, translations
 │   ├── shopify/        # auth, typed client, cost limiter, error helpers
-│   ├── steps/          # preflight, metafield definitions, collections, uploads, products, publishing
+│   ├── steps/          # preflight, locales, metafield definitions, collections, uploads, products,
+│   │                   # publishing, translations
 │   ├── seed.ts
 │   ├── teardown.ts
 │   └── cli.ts
@@ -183,9 +225,11 @@ seed/
 └── test/
 storefront/
 ├── src/
-│   ├── app/            # routes: home, collections/[handle], products/[handle]
+│   ├── app/[locale]/   # routes per language: home, collections/[handle], products/[handle]
 │   ├── components/     # tiles, catalogue grid, product picker, cart drawer, home sections
-│   └── lib/            # Storefront API client and queries, cart actions, variant logic, money
+│   ├── i18n/           # locales, dictionaries, message formatting
+│   ├── lib/            # Storefront API client and queries, cart actions, variant logic, money
+│   └── proxy.ts        # sends a URL without a language to the shopper's own
 ├── generated/          # GraphQL types from codegen
 └── test/
 ```

@@ -2,6 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { CollectionsQuery } from "../../../generated/storefront.generated";
+import { format } from "@/i18n/format";
+import { localePath } from "@/i18n/locales";
+import { getDictionary, getLocale } from "@/i18n/server";
 import { formatMoney, lowestPrice } from "@/lib/money";
 import { fieldFor } from "../fields";
 
@@ -17,7 +20,10 @@ const ROWS = 8;
 const TILES_PER_ROW = 14;
 
 /** The whole catalogue as a wall of specimens, with one panel that says what it is. */
-export function Hero({ images, collections }: HeroProps) {
+export async function Hero({ images, collections }: HeroProps) {
+  const [locale, dictionary] = await Promise.all([getLocale(), getDictionary()]);
+  const { home } = dictionary;
+
   return (
     <section
       aria-labelledby="hero-title"
@@ -27,16 +33,14 @@ export function Hero({ images, collections }: HeroProps) {
 
       <div className="grid gap-x-8 gap-y-5 bg-ink p-5 text-ground md:absolute md:bottom-6 md:left-1/2 md:w-[min(64rem,calc(100%-2*var(--spacing-gutter)))] md:-translate-x-1/2 md:grid-cols-[1fr_auto] md:items-end md:p-8">
         <h1 id="hero-title" className="text-title font-medium text-balance md:col-span-2">
-          Everyday basics in natural fibres
+          {home.heroTitle}
         </h1>
-        <p className="max-w-[36ch] text-lead text-pretty">
-          Organic cotton, linen, merino and cashmere, made to last.
-        </p>
+        <p className="max-w-[36ch] text-lead text-pretty">{home.heroLead}</p>
         <Link
           href="#catalogue"
           className="bg-ground px-6 py-3 text-center font-medium text-ink transition-colors hover:bg-ecru active:scale-[0.98]"
         >
-          Shop the basics
+          {dictionary.shopTheBasics}
         </Link>
         <ul className="flex flex-wrap gap-x-6 gap-y-1 text-small md:col-span-2">
           {collections.map((collection) => {
@@ -46,11 +50,15 @@ export function Hero({ images, collections }: HeroProps) {
             return (
               <li key={collection.handle}>
                 <Link
-                  href={`/collections/${collection.handle}`}
+                  href={localePath(locale, `/collections/${collection.handle}`)}
                   className="underline-offset-4 hover:underline"
                 >
-                  {collection.title}
-                  {from && ` from ${formatMoney(from)}`}
+                  {from
+                    ? format(home.collectionFrom, {
+                        collection: collection.title,
+                        price: formatMoney(from),
+                      })
+                    : collection.title}
                 </Link>
               </li>
             );

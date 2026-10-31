@@ -1,7 +1,11 @@
 import type { ProductCardFragment } from "../../generated/storefront.generated";
+import { placeFeatured } from "@/lib/product/featured";
 import { ProductTile } from "./product-tile";
 
-/** Every seventh specimen is shown at double size, so the grid reads as a wall, not a table. */
+/**
+ * Every seventh place holds a double tile, so the grid reads as a wall, not a table. Featured
+ * products fill those places, so the size says why the product is there.
+ */
 const DOUBLE_EVERY = 7;
 /** Roughly the first screen's worth of tiles: they load eagerly. */
 const FIRST_TILES = 4;
@@ -13,19 +17,19 @@ interface CatalogueProps {
 }
 
 export function Catalogue({ products, enterFrom }: CatalogueProps) {
-  // Sold-out pieces go last, so a double tile never shows something that can't be bought.
+  // Sold-out pieces go last: they can't be bought, so they shouldn't lead the grid.
   const ordered = products.toSorted(
     (a, b) => Number(b.availableForSale) - Number(a.availableForSale),
   );
 
   return (
-    <ul className="grid grid-flow-dense grid-cols-2 gap-x-2 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
-      {ordered.map((product, index) => (
+    <ul className="grid grid-flow-dense grid-cols-2 gap-x-2 md:grid-cols-3 lg:grid-cols-4">
+      {placeFeatured(ordered, DOUBLE_EVERY).map(({ product, double }, index) => (
         <ProductTile
           key={product.id}
           product={product}
           index={index}
-          double={index % DOUBLE_EVERY === 0}
+          double={double}
           eager={index < FIRST_TILES}
           enterStep={enterFrom !== undefined && index < FIRST_TILES ? enterFrom + index : undefined}
         />

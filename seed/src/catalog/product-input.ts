@@ -32,7 +32,9 @@ export function productChecksum(
   collectionId: string,
   imageHashes: Readonly<Record<string, string>>,
 ): string {
-  return checksum({ version: SEED_VERSION, product, collectionId, imageHashes });
+  // Translations sync in a step of their own, so a new translation doesn't resend the product.
+  const content = { ...product, translations: undefined };
+  return checksum({ version: SEED_VERSION, product: content, collectionId, imageHashes });
 }
 
 export function buildProductSetInput(
@@ -79,6 +81,8 @@ export function buildProductSetInput(
     metafields: [
       metafield(PRODUCT_METAFIELDS.fabric, product.fabric),
       metafield(PRODUCT_METAFIELDS.care, JSON.stringify(product.care)),
+      // productSet deletes the metafields it isn't given, so leaving this out clears an old label.
+      ...(product.featured ? [metafield(PRODUCT_METAFIELDS.featured, product.featured)] : []),
       metafield(CHECKSUM_METAFIELD, ctx.checksum),
     ],
   };

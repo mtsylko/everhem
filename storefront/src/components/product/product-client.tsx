@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useRef, useState, useTransition, type FormEvent } from "react";
 import type { ProductQuery } from "../../../generated/storefront.generated";
+import { format } from "@/i18n/format";
+import { useI18n } from "@/i18n/i18n-context";
 import { addToCart } from "@/lib/cart/actions";
 import {
   isValueAvailable,
@@ -46,9 +48,10 @@ export function Gallery({ product }: { product: Product }) {
 }
 
 export function GalleryView({ images, title }: { images: readonly Picture[]; title: string }) {
+  const { product } = useI18n().dictionary;
   return (
     <ul
-      aria-label={`Pictures of the ${title}`}
+      aria-label={format(product.pictures, { title })}
       className="-mx-gutter flex snap-x snap-mandatory gap-2 overflow-x-auto px-gutter lg:mx-0 lg:grid lg:grid-cols-2 lg:overflow-visible lg:px-0"
     >
       {images.map((image, index) => (
@@ -89,6 +92,8 @@ export function PurchaseView({
   onSelect?: (name: string, value: string) => void;
 }) {
   const { open } = useCart();
+  const { locale, dictionary } = useI18n();
+  const words = dictionary.product;
   const [isPending, startTransition] = useTransition();
   const [notice, setNotice] = useState<string | null>(null);
   const sizes = useRef<HTMLFieldSetElement>(null);
@@ -108,13 +113,13 @@ export function PurchaseView({
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!variant) {
-      setNotice("Choose a size first.");
+      setNotice(words.chooseSize);
       sizes.current?.querySelector("input")?.focus();
       return;
     }
     setNotice(null);
     startTransition(async () => {
-      const result = await addToCart(variant.id);
+      const result = await addToCart(variant.id, locale);
       setNotice(result.notice);
       if (result.ok) open();
     });
@@ -129,7 +134,7 @@ export function PurchaseView({
           disabled={!onSelect}
         >
           <legend className="mb-3">
-            {option.name === COLOR ? "Colour" : option.name}
+            {words.options[option.name] ?? option.name}
             {selection[option.name] && (
               <span className="text-muted">: {selection[option.name]}</span>
             )}
@@ -150,6 +155,7 @@ export function PurchaseView({
                   value={value.name}
                   checked={selection[option.name] === value.name}
                   available={available}
+                  soldOutLabel={words.soldOutOption}
                   picture={
                     option.name === COLOR
                       ? variants.find((v) =>
@@ -171,7 +177,7 @@ export function PurchaseView({
           disabled={!onSelect || isPending || soldOut}
           className="w-full bg-accent px-6 py-4 font-medium text-accent-ink transition hover:bg-accent-strong active:scale-[0.98] disabled:bg-surface disabled:text-muted"
         >
-          {soldOut ? "Sold out" : isPending ? "Adding…" : "Add to bag"}
+          {soldOut ? words.soldOut : isPending ? words.adding : words.addToBag}
         </button>
         <p role="status" className="mt-3 min-h-[1.5em]">
           {notice}
@@ -186,6 +192,7 @@ function OptionValue({
   value,
   checked,
   available,
+  soldOutLabel,
   picture,
   onSelect,
 }: {
@@ -193,6 +200,7 @@ function OptionValue({
   value: string;
   checked: boolean;
   available: boolean;
+  soldOutLabel: string;
   picture?: Picture | null;
   onSelect?: (name: string, value: string) => void;
 }) {
@@ -206,7 +214,7 @@ function OptionValue({
       className="peer sr-only"
     />
   );
-  const status = available ? null : <span className="sr-only"> (sold out)</span>;
+  const status = available ? null : <span className="sr-only"> {soldOutLabel}</span>;
 
   if (picture) {
     // A colour swatch is its own garment, zoomed in until only the fabric shows.

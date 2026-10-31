@@ -106,6 +106,24 @@ describe("buildProductSetInput", () => {
     ]);
   });
 
+  it("stores the reason a featured product is featured", () => {
+    const tee = products.find((p) => p.handle === "essential-crew-tee") as CatalogProduct;
+    const input = buildProductSetInput(tee, {
+      palette: colors,
+      locationId: "l",
+      collectionId: "c",
+      images: [],
+      existingVariantIds: new Map(),
+      checksum: "sha256:abc",
+    });
+    expect(input.metafields).toContainEqual({
+      namespace: "everhem",
+      key: "featured",
+      type: "single_line_text_field",
+      value: "Bestseller",
+    });
+  });
+
   it("clears the compare-at price when the product is not on sale", () => {
     const tee = products.find((p) => p.handle === "essential-crew-tee") as CatalogProduct;
     const input = buildProductSetInput(tee, {
