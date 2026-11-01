@@ -12,7 +12,7 @@ import {
 } from "@/components/product/product-client";
 import { ProductTile } from "@/components/product-tile";
 import { localePath } from "@/i18n/locales";
-import { alternates } from "@/i18n/metadata";
+import { alternates, openGraph } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { orderGallery, resolveSelection } from "@/lib/product/variants";
 import {
@@ -33,16 +33,23 @@ export async function generateMetadata({
   params,
 }: PageProps<"/[locale]/products/[handle]">): Promise<Metadata> {
   const { handle } = await params;
-  const product = await getProduct(handle);
+  const [product, locale] = await Promise.all([getProduct(handle), getLocale()]);
   if (!product) return {};
   const image = product.images.nodes[0];
+  const title = product.seo.title ?? product.title;
+  const description = product.seo.description ?? product.description;
   return {
-    title: product.seo.title ?? product.title,
-    description: product.seo.description ?? product.description,
-    openGraph: image
-      ? { images: [{ url: image.url, width: image.width ?? undefined, alt: image.altText ?? "" }] }
-      : undefined,
-    alternates: alternates(await getLocale(), `/products/${handle}`),
+    title,
+    description,
+    openGraph: {
+      ...openGraph(locale),
+      title,
+      description,
+      ...(image && {
+        images: [{ url: image.url, width: image.width ?? undefined, alt: image.altText ?? "" }],
+      }),
+    },
+    alternates: alternates(locale, `/products/${handle}`),
   };
 }
 

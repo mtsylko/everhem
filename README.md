@@ -228,8 +228,16 @@ The storefront is in English and Polish: `/en/...` and `/pl/...`.
 - **The storefront's own words are in dictionaries** (`src/i18n/dictionaries`), typed against the
   English one, with Polish plural forms picked by `Intl.PluralRules`. Client Components get the
   page's dictionary through context; Server Actions are given the locale as an argument.
-- **Search engines see each language.** Pages link their other language with `hreflang`. Set
-  `SITE_URL` in `.env.local` so those links are absolute and point at the real site.
+- **Search engines see each language.** Pages link their other language with `hreflang`, and
+  `/sitemap.xml` lists every home, collection and product page in both languages with the same
+  links, and the date Shopify last changed it. `/robots.txt` lets crawlers in and points at the
+  sitemap. Search results stay out of both: they are `noindex`. Set `SITE_URL` in `.env.local` so
+  these links are absolute and point at the real site.
+- **Shared links show a picture of their own.** The home page and each collection draw their
+  Open Graph image with `next/og`: the title in Roundo on the putty ground, beside four products,
+  in-stock and featured ones first. Product pages share their first photo. Every other page shares
+  the home page's image. Colours are read from `@theme` in `globals.css`, so the images can't drift
+  from the site.
 
 A development store keeps its password page, and Shopify's checkout shows it before the
 checkout. The password is in the admin under **Online Store → Preferences**.

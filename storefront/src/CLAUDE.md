@@ -13,7 +13,9 @@ before using an API you are not sure of. This code relies on:
 
 - `cacheComponents`, `partialPrefetching` and `reactCompiler` in `next.config.ts`.
 - `src/proxy.ts`, which replaced `middleware.ts`.
-- `next/root-params` to read `[locale]` in any Server Component.
+- `next/root-params` to read `[locale]` in any Server Component. Route Handlers, which
+  `opengraph-image`, `sitemap` and `robots` are, can't read it: they take the locale from `params`
+  and pass it to the catalog read (`getCollectionPreview`).
 - `"use cache"` with `cacheLife` and `cacheTag`, `refresh()` from `next/cache` after a Server
   Action, and `connection()` from `next/server`.
 - The global `PageProps<"/[locale]/…">` and `LayoutProps` types, which `next typegen` writes.
@@ -25,17 +27,21 @@ before using an API you are not sure of. This code relies on:
 
 - `src/app/[locale]/` holds every route, the root layout included: home, `collections/[handle]`,
   `products/[handle]`, `search`, `error.tsx`, `not-found.tsx`, and `[...missing]`, which sends
-  unknown paths to the 404 inside our own layout.
+  unknown paths to the 404 inside our own layout. The home page and collections have an
+  `opengraph-image.tsx`, drawn by `components/share/share-image.tsx`.
+- `src/app/sitemap.ts` and `src/app/robots.ts` sit outside `[locale]`, as they cover every
+  language.
 - `src/proxy.ts` redirects a URL without a language to the shopper's (cookie, then Accept-Language).
 - `src/lib/shopify/`: `client.ts` (`storefront()`, the only way to call the API), `catalog.ts`
   (cached catalog reads), `cart.ts` (cart query and mutations), `fragments.ts`, `api-version.ts`
   (kept in step with the seed) and `image-loader.ts` (Shopify's CDN resizes images).
 - `src/lib/cart/`: `actions.ts` (Server Actions) and `get-cart.ts` (the request-time cart read).
-- `src/lib/product/` and `src/lib/money.ts`: pure logic for variants, featured tiles, colours,
-  filter and search URLs (`browse.ts`) and prices. No React and no Next.js in there, so `test/`
-  can cover it.
+- `src/lib/product/`, `src/lib/money.ts` and `src/lib/theme.ts`: pure logic for variants,
+  featured tiles, colours, filter and search URLs (`browse.ts`), prices, and the `@theme` colours
+  drawn images use. No React and no Next.js in there, so `test/` can cover it.
 - `src/i18n/`: locales, dictionaries, message formatting, `server.ts` for Server Components,
-  `i18n-context.tsx` for Client Components, `metadata.ts` for hreflang.
+  `i18n-context.tsx` for Client Components, `metadata.ts` for `SITE_URL`, hreflang and the shared
+  Open Graph fields.
 - `src/components/`: grouped by area (`cart/`, `collection/`, `home/`, `product/`, `search/`),
   with shared pieces at the top (`catalogue`, `product-tile`, `price`, `fields`).
   `collection/browse-listing.tsx` is the filtered grid that collections and search share.
@@ -54,8 +60,8 @@ Use the Shopify AI Toolkit (`shopify-dev-mcp`) to look up and validate Storefron
   the generated ones (`NonNullable<ProductQuery["product"]>`, `ReturnType`), never hand-write a
   response shape.
 - **Every query and cart mutation takes `$language` with `@inContext(language: $language)`.**
-  Without it, Polish pages show English text. Only `ProductHandles` goes without, as handles are
-  not translated.
+  Without it, Polish pages show English text. Only `ProductHandles` and `CollectionHandles` go
+  without, as handles are not translated.
 - **A query appends each fragment it spreads exactly once.** `ProductCard` and `Cart` spread
   `Image` and `Money`, so a query using them appends those too.
 - **Catalog reads are cached functions** in `catalog.ts`: `"use cache"`, `cacheLife("hours")`,
@@ -115,7 +121,8 @@ Use the Shopify AI Toolkit (`shopify-dev-mcp`) to look up and validate Storefron
   `formatPlural()`: Polish needs `one`, `few`, `many` and `other`.
 - In Polish copy, one-letter words (a, i, o, u, w, z) stay with the next word through ` `.
 - Prices use `formatMoney` in both languages: the store sells in PLN.
-- A new page's `generateMetadata` returns `alternates(locale, path)` for hreflang.
+- A new page's `generateMetadata` returns `alternates(locale, path)` for hreflang. If it sets
+  `openGraph`, it spreads `openGraph(locale)` in: Next.js replaces a parent's `openGraph` whole.
 
 ## Styling rules
 

@@ -6,6 +6,7 @@ import { Header } from "@/components/header";
 import { dictionaryFor } from "@/i18n/dictionaries";
 import { I18nProvider } from "@/i18n/i18n-context";
 import { LOCALES } from "@/i18n/locales";
+import { openGraph, SITE_URL } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { getCart } from "@/lib/cart/get-cart";
 import "../globals.css";
@@ -16,12 +17,15 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { meta } = await getDictionary();
+  const [locale, { meta }] = await Promise.all([getLocale(), getDictionary()]);
   return {
-    // hreflang links need absolute URLs.
-    metadataBase: new URL(process.env.SITE_URL || "http://localhost:3000"),
+    // hreflang links and shared images need absolute URLs.
+    metadataBase: SITE_URL,
     title: { default: meta.title, template: "%s · Everhem" },
     description: meta.description,
+    openGraph: openGraph(locale),
+    // A link shared on X shows the wide picture, as it does everywhere else.
+    twitter: { card: "summary_large_image" },
   };
 }
 
