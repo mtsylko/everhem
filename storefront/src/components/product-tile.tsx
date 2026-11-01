@@ -48,7 +48,7 @@ export async function ProductTile({
 
   return (
     <li
-      className={`${enterStep === undefined ? "rise" : "enter"} grid grid-rows-subgrid pb-8 ${double ? "col-span-2 row-span-4" : "row-span-2"}`}
+      className={`${enterStep === undefined ? "rise rise-even" : "enter"} grid grid-rows-subgrid pb-8 ${double ? "col-span-2 row-span-4" : "row-span-2"}`}
       style={enterStep === undefined ? undefined : ({ "--enter-step": enterStep } as CSSProperties)}
     >
       <Link

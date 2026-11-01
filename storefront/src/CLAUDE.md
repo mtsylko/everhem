@@ -147,7 +147,8 @@ plainly. The tokens live in `@theme` in `src/app/globals.css`; there is no `tail
 - **Product pictures** use `next/image` with `fill` and honest `sizes`, `mix-blend-multiply` over
   a field from `fieldFor(index)`, so the photo's ground melts into the field.
 - **Motion**: `.rise` for scroll entrances, `.enter` with `--enter-step` for the first screen, and
-  `ease-out-expo`. All of it sits behind `prefers-reduced-motion`. Nothing moves on its own without
+  `ease-out-expo`. Add `.rise-even` where neighbours differ in height, as tiles in a row do, so
+  they rise together. All of it sits behind `prefers-reduced-motion`. Nothing moves on its own without
   a way to pause it (WCAG 2.2.2).
 - **Arbitrary values are fine when nothing fits**: `aspect-[4/5]`, `max-w-[40ch]`,
   `[--enter-step:1]`. `style={{}}` is only for runtime values and custom properties a child reads.
