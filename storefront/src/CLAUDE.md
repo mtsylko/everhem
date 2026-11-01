@@ -46,7 +46,7 @@ before using an API you are not sure of. This code relies on:
   `i18n-context.tsx` for Client Components, `metadata.ts` for `SITE_URL`, hreflang and the shared
   Open Graph fields.
 - `src/components/`: grouped by area (`cart/`, `collection/`, `home/`, `product/`, `search/`),
-  with shared pieces at the top (`catalogue`, `product-tile`, `price`, `fields`).
+  with shared pieces at the top (`catalogue`, `product-tile`, `price`, `fields`, `select`).
   `collection/browse-listing.tsx` is the filtered grid that collections and search share.
 - `generated/`: GraphQL types from codegen. Never edit by hand.
 - `@/*` resolves to `src/*`. Generated types sit outside `src`, so they are imported relatively.
@@ -155,6 +155,9 @@ plainly. The tokens live in `@theme` in `src/app/globals.css`; there is no `tail
   spacing (WCAG 1.4.12) all need the room.
 - **Every state keeps its contrast**: text stays at 4.5:1 on hover too. An ink button turns
   `bg-accent text-accent-ink` on hover; ground text on the teal is only 4.1:1.
+- **What Tailwind can't name goes in a CSS module beside its component**, as a select's opened
+  list (`::picker(select)`) does in `select.module.css`. `globals.css` keeps the tokens and what
+  every page shares.
 - **Arbitrary values are fine when nothing fits**: `aspect-[4/5]`, `max-w-[40ch]`,
   `[--enter-step:1]`. `style={{}}` is only for runtime values and custom properties a child reads.
 - **Icons are inline SVG** with `aria-hidden`, like the footer's arrow, and controls carry text

@@ -1,0 +1,58 @@
+/*
+  The select's opened list is ours too, where the browser lets CSS draw it (appearance: base-select).
+  Elsewhere the system draws the list. Tailwind has no names for these parts, so they live here,
+  beside the component, rather than in its classes.
+*/
+.select {
+  appearance: none;
+}
+@supports (appearance: base-select) {
+  .select,
+  .select::picker(select) {
+    appearance: base-select;
+  }
+  .select {
+    align-items: center;
+  }
+  /* The select draws its own arrow, which the other browsers need as well. */
+  .select::picker-icon {
+    display: none;
+  }
+  /*
+    The list opens over fields of every colour, surface ones included. Ink stands apart from all of
+    them, which a flat list needs in place of a shadow.
+  */
+  .select::picker(select) {
+    border: 0;
+    padding: 0;
+    background: var(--color-ink);
+    color: var(--color-ground);
+    /* Chrome opens the list toward the roomier side; ours drops down unless it doesn't fit. */
+    position-try-order: normal;
+  }
+  /* The select's own spacing: its arrow sits 1rem from the edge, 0.75rem after the label. */
+  .select option {
+    min-block-size: 3rem;
+    padding-inline: 1rem;
+    gap: 0.75rem;
+    transition-property: background-color, color;
+    transition-duration: 150ms;
+  }
+  /* An option lights up as an ink button does. The fill shows keyboard focus too. */
+  .select option:hover,
+  .select option:focus-visible {
+    outline: none;
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+  }
+  /* The chosen option's tick sits under the select's arrow, drawn with the same stroke. */
+  .select option::checkmark {
+    content: "";
+    order: 1;
+    margin-inline-start: auto;
+    inline-size: 1rem;
+    block-size: 1rem;
+    background: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='m3 8.5 3.5 3.5 7-8'/%3E%3C/svg%3E");
+  }
+}

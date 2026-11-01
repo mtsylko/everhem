@@ -11,7 +11,9 @@ const nextConfig: NextConfig = {
   },
   turbopack: {
     rules: {
+      // `as` makes every match plain CSS, so a CSS module would lose its scoped class names.
       "*.css": {
+        condition: { not: { path: /\.module\.css$/ } },
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },

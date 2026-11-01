@@ -118,64 +118,6 @@
     }
   }
 
-  /*
-    A select whose opened list is ours too, where the browser lets CSS draw it (appearance:
-    base-select). Elsewhere the system draws the list.
-  */
-  .flat-select {
-    appearance: none;
-  }
-  @supports (appearance: base-select) {
-    .flat-select,
-    .flat-select::picker(select) {
-      appearance: base-select;
-    }
-    .flat-select {
-      align-items: center;
-    }
-    /* The select draws its own arrow, which the other browsers need as well. */
-    .flat-select::picker-icon {
-      display: none;
-    }
-    /*
-      The list opens over fields of every colour, surface ones included. Ink stands apart from all of
-      them, which a flat list needs in place of a shadow.
-    */
-    .flat-select::picker(select) {
-      border: 0;
-      padding: 0;
-      background: var(--color-ink);
-      color: var(--color-ground);
-      /* Chrome opens the list toward the roomier side; ours drops down unless it doesn't fit. */
-      position-try-order: normal;
-    }
-    /* The select's own spacing: its arrow sits 1rem from the edge, 0.75rem after the label. */
-    .flat-select option {
-      min-block-size: 3rem;
-      padding-inline: 1rem;
-      gap: 0.75rem;
-      transition-property: background-color, color;
-      transition-duration: 150ms;
-    }
-    /* An option lights up as an ink button does. The fill shows keyboard focus too. */
-    .flat-select option:hover,
-    .flat-select option:focus-visible {
-      outline: none;
-      background: var(--color-accent);
-      color: var(--color-accent-ink);
-    }
-    /* The chosen sort's tick sits under the select's arrow, drawn with the same stroke. */
-    .flat-select option::checkmark {
-      content: "";
-      order: 1;
-      margin-inline-start: auto;
-      inline-size: 1rem;
-      block-size: 1rem;
-      background: currentColor;
-      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='m3 8.5 3.5 3.5 7-8'/%3E%3C/svg%3E");
-    }
-  }
-
   /* What the first screen holds rises in as the page loads, one step after another. */
   @media (prefers-reduced-motion: no-preference) {
     .enter {
