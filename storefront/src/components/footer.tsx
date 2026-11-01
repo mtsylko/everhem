@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { localePath } from "@/i18n/locales";
 import { getDictionary, getLocale } from "@/i18n/server";
-import { getCollections } from "@/lib/shopify/catalog";
+import { ALL_COLLECTION, getCollections } from "@/lib/shopify/catalog";
 
 const REPOSITORY = "https://github.com/mtsylko/everhem";
 
@@ -28,10 +28,10 @@ export async function Footer() {
         <ul className="space-y-1">
           <li>
             <Link
-              href={localePath(locale, "/#catalogue")}
+              href={localePath(locale, `/collections/${ALL_COLLECTION}`)}
               className="underline-offset-4 hover:underline"
             >
-              {footer.allBasics}
+              {dictionary.layout.allBasics}
             </Link>
           </li>
           {collections.map((collection) => (

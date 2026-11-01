@@ -169,9 +169,20 @@ npm run start -w storefront     # serve the production build
 
 ### How it works
 
-- **Pages are static, the cart is not.** With Cache Components, catalog reads are cached
-  functions (`"use cache"`, one `catalog` tag) and every page prerenders at build time. Only the
-  cart is read per request: it streams into the static shell inside Suspense.
+- **Pages are static, the cart and filtered lists are not.** With Cache Components, catalog reads
+  are cached functions (`"use cache"`, one `catalog` tag) and every page prerenders at build time.
+  The cart and a collection's product list are read per request: they stream into the static
+  shell inside Suspense.
+- **Shopify filters and sorts the collections.** A collection page sends the shopper's choice to
+  the Storefront API (`filters`, `sortKey`) and builds its filter form from the filters Shopify
+  returns, with a count for each value. The choice lives in the URL under Liquid's parameter
+  names (`?filter.v.availability=1&filter.v.price.gte=100&sort_by=price-ascending`), so a link
+  can be shared and the back button undoes a filter. The form is a plain GET form, so it works
+  before JavaScript loads. Each choice is a cache entry of its own.
+- **Which filters exist is set in the admin.** Without the free
+  [Search & Discovery](https://apps.shopify.com/search-and-discovery) app, Shopify offers
+  availability and price. Install it and add filters (Color and Size, for example) under
+  **Search & Discovery → Filters**, and they appear in the form with no code change.
 - **The cart lives in Shopify.** Its ID sits in an httpOnly cookie. Adding, changing and removing
   lines are Server Actions that validate their input, call the Cart API and refresh the page. The
   bag updates optimistically with `useOptimistic`, and checkout goes to the cart's `checkoutUrl`.
@@ -228,9 +239,9 @@ seed/
 storefront/
 ├── src/
 │   ├── app/[locale]/   # routes per language: home, collections/[handle], products/[handle]
-│   ├── components/     # tiles, catalogue grid, product picker, cart drawer, home sections
+│   ├── components/     # tiles, catalogue grid, filter form, product picker, cart drawer, home sections
 │   ├── i18n/           # locales, dictionaries, message formatting
-│   ├── lib/            # Storefront API client and queries, cart actions, variant logic, money
+│   ├── lib/            # Storefront API client and queries, cart actions, variant and filter logic, money
 │   └── proxy.ts        # sends a URL without a language to the shopper's own
 ├── generated/          # GraphQL types from codegen
 └── test/
