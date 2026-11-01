@@ -1,7 +1,9 @@
 import type { CollectionSourceInclusionConditionInput } from "../../generated/admin.types.js";
 
 export const SIZES = ["XS", "S", "M", "L", "XL"] as const;
-export type Size = (typeof SIZES)[number];
+/** The size accessories come in. */
+export const ONE_SIZE = "One size";
+export type Size = (typeof SIZES)[number] | typeof ONE_SIZE;
 
 /** Why a product is featured. The storefront shows it as the product's label. */
 export const FEATURE_REASONS = ["New", "Bestseller", "Staff pick"] as const;
@@ -18,7 +20,43 @@ export type TranslatedLocale = (typeof TRANSLATED_LOCALES)[number];
 export type Translated<T> = Readonly<Record<TranslatedLocale, T>>;
 
 export type Garment =
-  "tee" | "long-sleeve" | "hoodie" | "zip-hoodie" | "sweater" | "cardigan" | "turtleneck";
+  | "tee"
+  | "v-neck-tee"
+  | "pocket-tee"
+  | "tank"
+  | "polo"
+  | "henley"
+  | "long-sleeve"
+  | "sweatshirt"
+  | "quarter-zip"
+  | "hoodie"
+  | "zip-hoodie"
+  | "sweater"
+  | "v-neck-sweater"
+  | "cardigan"
+  | "turtleneck"
+  | "vest"
+  | "beanie"
+  | "scarf"
+  | "socks"
+  | "tote";
+
+/** The cut the placeholder image draws: how wide, how long, and where the shoulder sits. */
+export type Fit = "regular" | "slim" | "relaxed" | "boxy" | "oversized";
+
+/** The fabric surface the placeholder image draws. */
+export type Texture =
+  | "jersey"
+  | "slub"
+  | "pique"
+  | "waffle"
+  | "fleece"
+  | "terry"
+  | "fine-knit"
+  | "brushed"
+  | "rib-knit"
+  | "cable"
+  | "canvas";
 
 export interface Color {
   name: string;
@@ -71,11 +109,15 @@ export interface CatalogProduct extends ProductText {
   collection: string;
   productType: string;
   garment: Garment;
+  fit: Fit;
+  texture: Texture;
   /** Short code used in SKUs, e.g. ECT. */
   code: string;
   price: string;
   compareAtPrice?: string;
   colors: readonly string[];
+  /** The sizes it comes in, XS to XL when left out. */
+  sizes?: readonly Size[];
   stock: StockPlan;
   /** Puts the product in the storefront's double tiles, labelled with the reason. */
   featured?: FeatureReason;

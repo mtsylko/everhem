@@ -11,14 +11,23 @@ describe("Everhem catalog", () => {
     expect(validateCatalog(products, collections, colors)).toEqual([]);
   });
 
-  it("has 12 products across 3 collections, each in 2 or 3 colors", () => {
-    expect(products).toHaveLength(12);
+  it("has 36 products across 4 collections, each in 2 or 3 colors", () => {
+    expect(products).toHaveLength(36);
     expect(new Set(products.map((p) => p.collection))).toEqual(
-      new Set(["tees", "hoodies", "knitwear"]),
+      new Set(["tees", "hoodies", "knitwear", "accessories"]),
     );
     for (const product of products) {
       expect(product.colors.length).toBeGreaterThanOrEqual(2);
       expect(product.colors.length).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it("sells accessories in one size and everything else in XS to XL", () => {
+    for (const product of products) {
+      const sizes = planVariants(product, colors).map((variant) => variant.size);
+      expect(new Set(sizes)).toEqual(
+        new Set(product.collection === "accessories" ? ["One size"] : ["XS", "S", "M", "L", "XL"]),
+      );
     }
   });
 
@@ -39,6 +48,20 @@ describe("validateCatalog", () => {
     expect(errors).toContain(`duplicate product handle "${base.handle}"`);
     expect(errors).toContain(`duplicate product code "${base.code}"`);
     expect(errors.some((e) => e.startsWith("duplicate SKU"))).toBe(true);
+  });
+
+  it("reports a sold-out size the product doesn't come in", () => {
+    const beanie = products.find((p) => p.sizes) as CatalogProduct;
+    const broken = {
+      ...beanie,
+      stock: {
+        kind: "in-stock" as const,
+        soldOut: [{ color: beanie.colors[0] as string, size: "M" as const }],
+      },
+    };
+    expect(validateCatalog([broken], collections, colors)).toContain(
+      `${beanie.handle}: sold-out size "M" is not a product size`,
+    );
   });
 
   it("reports unknown colors and collections", () => {

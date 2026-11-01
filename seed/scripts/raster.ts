@@ -19,21 +19,22 @@ export class Canvas {
 
   /** Fills a polygon with the even-odd rule. */
   fill(points: readonly Point[], color: Rgb): void {
-    if (points.length < 3) return;
-    const ys = points.map(([, y]) => y);
-    const top = Math.max(0, Math.floor(Math.min(...ys)));
-    const bottom = Math.min(this.height, Math.ceil(Math.max(...ys)));
-    const coverage = new Float32Array(this.width);
+    scan(points, this.width, this.height, (y, coverage) => this.#blendRow(y, coverage, color));
+  }
 
-    for (let y = top; y < bottom; y++) {
-      coverage.fill(0);
-      for (let s = 0; s < SUBROWS; s++) {
-        const crossings = crossingsAt(points, y + (s + 0.5) / SUBROWS);
-        for (let i = 0; i + 1 < crossings.length; i += 2) {
-          addSpan(coverage, crossings[i] as number, crossings[i + 1] as number, 1 / SUBROWS);
-        }
+  /**
+   * Darkens each pixel by its offset when the offset is negative and lightens it when positive,
+   * as a share of the way to black or white. Folds stay visible on black and on white this way.
+   */
+  shade(offsets: Float32Array): void {
+    const p = this.#pixels;
+    for (let i = 0; i < offsets.length; i++) {
+      const offset = offsets[i] as number;
+      if (offset === 0) continue;
+      for (let c = i * 3; c < i * 3 + 3; c++) {
+        const v = p[c] as number;
+        p[c] = offset < 0 ? v * (1 + offset) : v + (255 - v) * offset;
       }
-      this.#blendRow(y, coverage, color);
     }
   }
 
@@ -51,6 +52,55 @@ export class Canvas {
       p[i + 1] = (p[i + 1] as number) * (1 - alpha) + g * alpha;
       p[i + 2] = (p[i + 2] as number) * (1 - alpha) + b * alpha;
     }
+  }
+}
+
+/** How much of each pixel a set of shapes covers, 0 to 1. Used for shading, not color. */
+export class Mask {
+  readonly width: number;
+  readonly height: number;
+  readonly data: Float32Array;
+
+  constructor(width: number, height: number) {
+    this.width = width;
+    this.height = height;
+    this.data = new Float32Array(width * height);
+  }
+
+  /** Adds a polygon at the given strength, keeping the stronger value where shapes overlap. */
+  fill(points: readonly Point[], strength = 1): void {
+    scan(points, this.width, this.height, (y, coverage) => {
+      for (let x = 0; x < this.width; x++) {
+        const value = Math.min(1, coverage[x] as number) * strength;
+        const i = y * this.width + x;
+        if (value > (this.data[i] as number)) this.data[i] = value;
+      }
+    });
+  }
+}
+
+/** Calls `row` with the coverage of every pixel row the polygon touches, by the even-odd rule. */
+function scan(
+  points: readonly Point[],
+  width: number,
+  height: number,
+  row: (y: number, coverage: Float32Array) => void,
+): void {
+  if (points.length < 3) return;
+  const ys = points.map(([, y]) => y);
+  const top = Math.max(0, Math.floor(Math.min(...ys)));
+  const bottom = Math.min(height, Math.ceil(Math.max(...ys)));
+  const coverage = new Float32Array(width);
+
+  for (let y = top; y < bottom; y++) {
+    coverage.fill(0);
+    for (let s = 0; s < SUBROWS; s++) {
+      const crossings = crossingsAt(points, y + (s + 0.5) / SUBROWS);
+      for (let i = 0; i + 1 < crossings.length; i += 2) {
+        addSpan(coverage, crossings[i] as number, crossings[i + 1] as number, 1 / SUBROWS);
+      }
+    }
+    row(y, coverage);
   }
 }
 
@@ -83,4 +133,37 @@ export function addSpan(coverage: Float32Array, from: number, to: number, weight
   coverage[first] = (coverage[first] as number) + (first + 1 - start) * weight;
   for (let x = first + 1; x < last; x++) coverage[x] = (coverage[x] as number) + weight;
   if (last < coverage.length) coverage[last] = (coverage[last] as number) + (end - last) * weight;
+}
+
+/** Blurs a plane with three box blurs in a row, which comes close to a Gaussian. */
+export function blur(src: Float32Array, width: number, height: number, radius: number) {
+  let plane = src;
+  for (let pass = 0; pass < 3; pass++) {
+    plane = boxBlur(plane, width, height, radius, 1, width);
+    plane = boxBlur(plane, height, width, radius, width, 1);
+  }
+  return plane;
+}
+
+/** Blurs every line of `length` pixels; `step` moves along a line, `next` to the next line. */
+function boxBlur(
+  src: Float32Array,
+  length: number,
+  lines: number,
+  radius: number,
+  step: number,
+  next: number,
+) {
+  const out = new Float32Array(src.length);
+  const at = (line: number, i: number) =>
+    src[line * next + Math.min(length - 1, Math.max(0, i)) * step] as number;
+  for (let line = 0; line < lines; line++) {
+    let sum = 0;
+    for (let i = -radius; i <= radius; i++) sum += at(line, i);
+    for (let i = 0; i < length; i++) {
+      out[line * next + i * step] = sum / (2 * radius + 1);
+      sum += at(line, i + radius + 1) - at(line, i - radius);
+    }
+  }
+  return out;
 }

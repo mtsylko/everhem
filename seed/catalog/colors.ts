@@ -20,6 +20,10 @@ const palette: Color[] = [
   { name: "Cream", code: "CRM", hex: "#F1E8D6", translations: { pl: "Kremowy" } },
   { name: "Moss", code: "MOS", hex: "#5E6B43", translations: { pl: "Zieleń mchu" } },
   { name: "Chocolate", code: "CHO", hex: "#5A3E2E", translations: { pl: "Czekoladowy" } },
+  { name: "Rust", code: "RST", hex: "#9A4B2E", translations: { pl: "Rdzawy" } },
+  { name: "Burgundy", code: "BRG", hex: "#5B2333", translations: { pl: "Burgundowy" } },
+  { name: "Mustard", code: "MSD", hex: "#C29A3B", translations: { pl: "Musztardowy" } },
+  { name: "Sky", code: "SKY", hex: "#A7BED3", translations: { pl: "Błękitny" } },
 ];
 
 export const colors: ReadonlyMap<string, Color> = new Map(palette.map((c) => [c.name, c]));

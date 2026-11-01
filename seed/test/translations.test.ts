@@ -25,7 +25,13 @@ const sources: ProductSources = {
         { id: "gid://shopify/ProductOptionValue/2", name: "Neon Pink" },
       ],
     },
-    { name: "Size", optionValues: [{ id: "gid://shopify/ProductOptionValue/3", name: "M" }] },
+    {
+      name: "Size",
+      optionValues: [
+        { id: "gid://shopify/ProductOptionValue/3", name: "M" },
+        { id: "gid://shopify/ProductOptionValue/4", name: "One size" },
+      ],
+    },
   ],
   fabric: { id: "gid://shopify/Metafield/1" },
   care: null,
@@ -63,13 +69,16 @@ describe("translatedAlt", () => {
 describe("wantedProductTranslations", () => {
   const wanted = wantedProductTranslations(product, sources, colors, "pl");
 
-  it("translates the product text, colours, fabric and alt text, but not sizes", () => {
+  it("translates the product text, colours, fabric and alt text, but not XS to XL", () => {
     expect(wanted.get(sources.id)).toEqual({
       title: "T-shirt Essential",
       body_html: product.translations.pl.descriptionHtml,
     });
     expect(wanted.get("gid://shopify/ProductOptionValue/1")).toEqual({ name: "Czarny" });
     expect(wanted.has("gid://shopify/ProductOptionValue/3")).toBe(false);
+    expect(wanted.get("gid://shopify/ProductOptionValue/4")).toEqual({
+      name: "Rozmiar uniwersalny",
+    });
     expect(wanted.get("gid://shopify/Metafield/1")).toEqual({
       value: "100% bawełna organiczna, dzianina 180 g/m²",
     });
