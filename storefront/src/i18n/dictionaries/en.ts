@@ -6,7 +6,7 @@ export const en = {
   meta: {
     title: "Everhem: everyday basics in natural fibres",
     description:
-      "Tees, hoodies and knitwear in organic cotton, linen, merino and cashmere. A demo store built on the Shopify Storefront API.",
+      "Tees, hoodies, knitwear and accessories in organic cotton, linen, merino and cashmere. A demo store built on the Shopify Storefront API.",
   },
   layout: {
     skipToContent: "Skip to content",
@@ -22,7 +22,7 @@ export const en = {
     collectionFrom: "{collection} from {price}",
     catalogueTitle: plural({ one: "One basic", other: "All {count} basics" }),
     catalogueLead:
-      "Tees, hoodies and knits in sizes XS to XL. Each one is shown in its first colour; the others are on its page.",
+      "Tees, hoodies and knits in sizes XS to XL, and accessories in one size. Each one is shown in its first colour; the others are on its page.",
     coloursTitle: "Shop by colour",
     stylesInColour: plural({
       one: "One style in {colourLower}",
