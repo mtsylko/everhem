@@ -39,11 +39,11 @@ export default async function Home() {
 
       <section id="catalogue" aria-labelledby="catalogue-title" className="px-gutter pt-section">
         {/* Laid out like a collection's heading: the lead starts on the grid's third column. */}
-        <div className="mb-10 grid gap-4 lg:grid-cols-12 lg:items-baseline-last lg:gap-2">
-          <h2 id="catalogue-title" className="rise text-head font-medium lg:col-span-6">
+        <div className="mb-10 grid gap-4 lg:grid-cols-12 lg:items-start lg:gap-2">
+          <h2 id="catalogue-title" className="rise text-head font-medium lg:col-span-6 lg:trim-cap">
             {formatPlural(locale, home.catalogueTitle, products.length)}
           </h2>
-          <p className="rise max-w-[40ch] text-pretty lg:col-span-6 lg:col-start-7">
+          <p className="rise max-w-[40ch] text-pretty lg:col-span-6 lg:col-start-7 lg:trim-cap">
             {home.catalogueLead}
           </p>
         </div>

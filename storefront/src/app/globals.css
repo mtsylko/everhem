@@ -116,6 +116,14 @@
   }
 }
 
+/*
+  Drops the space above a block's capitals, so a heading and the smaller text beside it can start on
+  one line. Browsers without text-box keep that space, which leaves the two a few pixels apart.
+*/
+@utility trim-cap {
+  text-box: trim-start cap alphabetic;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
