@@ -12,6 +12,8 @@ This repository holds two parts:
 ## What the seed creates
 
 - 3 collections: Tees, Hoodies, Knitwear
+- An automatic **All basics** collection (handle `all`): Shopify adds every active product to it,
+  so the storefront can filter the whole range in one place
 - 12 products, each in 2–3 colors and sizes XS–XL, which makes 150 variants
 - Prices in PLN, some with compare-at prices for a sale
 - SKUs such as `HEM-ECT-BLK-M`, and stock at the store's main location

@@ -1,3 +1,4 @@
+import type { CollectionCreateSourceTargetInput } from "../../generated/admin.types.js";
 import { collections } from "../../catalog/collections.ts";
 import { checksum } from "../catalog/checksum.ts";
 import type { CatalogCollection } from "../catalog/types.ts";
@@ -59,7 +60,10 @@ export interface CollectionSync {
   ids: Map<string, string>;
 }
 
-/** Manual collections. Products join them through productSet, so no rules to keep in sync. */
+/**
+ * Ranges list their products by hand: each product joins its range through productSet. A collection
+ * with conditions gets its products from Shopify instead, which keeps it in step with the catalog.
+ */
 export async function syncCollections(ctx: RunContext, store: Store): Promise<CollectionSync> {
   const result: CollectionSync = { outcomes: [], ids: new Map() };
   for (const collection of collections) {
@@ -80,9 +84,10 @@ async function syncCollection(ctx: RunContext, store: Store, collection: Catalog
   if (existing && !existing.seedChecksum) throw new NotOwnedError("collection", collection.handle);
 
   // Translations sync in a step of their own, so a new translation doesn't resend the collection.
+  // Conditions are only sent on create, so they aren't part of what an update compares.
   const sum = checksum({
     version: SEED_VERSION,
-    collection: { ...collection, translations: undefined },
+    collection: { ...collection, translations: undefined, conditions: undefined },
   });
   const fields = {
     title: collection.title,
@@ -104,7 +109,9 @@ async function syncCollection(ctx: RunContext, store: Store, collection: Catalog
     assertNoUserErrors(`update collection ${collection.handle}`, collectionUpdate?.userErrors);
     action = "updated";
   } else {
-    const { collectionCreate } = await client.request(CREATE_COLLECTION, { collection: fields });
+    const { collectionCreate } = await client.request(CREATE_COLLECTION, {
+      collection: { ...fields, sources: sourcesFor(collection) },
+    });
     assertNoUserErrors(`create collection ${collection.handle}`, collectionCreate?.userErrors);
     id = collectionCreate?.collection?.id;
     if (!id) throw new Error(`collectionCreate returned no id for ${collection.handle}`);
@@ -123,4 +130,21 @@ async function syncCollection(ctx: RunContext, store: Store, collection: Catalog
     );
   }
   return { action, id };
+}
+
+/** One source that adds every product matching all of the collection's conditions. */
+function sourcesFor({
+  title,
+  conditions,
+}: CatalogCollection): CollectionCreateSourceTargetInput[] | undefined {
+  if (!conditions) return undefined;
+  return [
+    {
+      source: {
+        title,
+        targetType: "PRODUCTS",
+        inclusion: { matchType: "ALL", conditions: [...conditions] },
+      },
+    },
+  ];
 }

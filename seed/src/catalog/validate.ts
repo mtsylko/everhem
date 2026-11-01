@@ -11,6 +11,7 @@ export function validateCatalog(
   palette: ReadonlyMap<string, Color>,
 ): string[] {
   const collectionHandles = collections.map((c) => c.handle);
+  const automatic = collections.filter((c) => c.conditions).map((c) => c.handle);
   const productHandles = products.map((p) => p.handle);
   const productCodes = products.map((p) => p.code);
   const errors = [
@@ -24,6 +25,8 @@ export function validateCatalog(
 
     if (!collectionHandles.includes(product.collection)) {
       at(`unknown collection "${product.collection}"`);
+    } else if (automatic.includes(product.collection)) {
+      at(`collection "${product.collection}" picks its products by conditions`);
     }
     for (const color of product.colors) {
       if (!palette.has(color)) at(`unknown color "${color}"`);
