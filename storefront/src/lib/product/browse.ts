@@ -1,20 +1,54 @@
-import type { ProductCollectionSortKeys, ProductFilter } from "../../../generated/storefront.types";
+import type {
+  ProductCollectionSortKeys,
+  ProductFilter,
+  SearchSortKeys,
+} from "../../../generated/storefront.types";
+
+/** The Storefront API's sort keys for each kind of list. */
+interface SortKeys {
+  collection: ProductCollectionSortKeys;
+  search: SearchSortKeys;
+}
+
+/** What is being browsed: a collection, or the results of a search. */
+export type Scope = keyof SortKeys;
+
+interface Sort<Key> {
+  sortKey: Key;
+  reverse: boolean;
+}
 
 /**
- * How a collection can be sorted, under the `sort_by` values Liquid themes use. Best-selling is left
- * out: a demo store has no sales to rank by.
+ * How each list can be sorted, under the `sort_by` values Liquid themes use. Best-selling is left
+ * out: a demo store has no sales to rank by. Shopify ranks search results by relevance or price only.
  */
 export const SORTS = {
-  manual: { sortKey: "COLLECTION_DEFAULT", reverse: false },
-  "created-descending": { sortKey: "CREATED", reverse: true },
-  "price-ascending": { sortKey: "PRICE", reverse: false },
-  "price-descending": { sortKey: "PRICE", reverse: true },
-} as const satisfies Record<string, { sortKey: ProductCollectionSortKeys; reverse: boolean }>;
+  collection: {
+    manual: { sortKey: "COLLECTION_DEFAULT", reverse: false },
+    "created-descending": { sortKey: "CREATED", reverse: true },
+    "price-ascending": { sortKey: "PRICE", reverse: false },
+    "price-descending": { sortKey: "PRICE", reverse: true },
+  },
+  search: {
+    relevance: { sortKey: "RELEVANCE", reverse: false },
+    "price-ascending": { sortKey: "PRICE", reverse: false },
+    "price-descending": { sortKey: "PRICE", reverse: true },
+  },
+} as const satisfies { [S in Scope]: Record<string, Sort<SortKeys[S]>> };
 
-export type SortBy = keyof typeof SORTS;
+type SortNames = { [S in Scope]: keyof (typeof SORTS)[S] };
 
-export const DEFAULT_SORT: SortBy = "manual";
+/** A `sort_by` value of one list, or of any list when no scope is given. */
+export type SortBy<S extends Scope = Scope> = SortNames[S];
 
+/** The order a list keeps until the shopper picks one. */
+export const DEFAULT_SORT: SortNames = {
+  collection: "manual",
+  search: "relevance",
+};
+
+/** The search terms' parameter, as in a Liquid theme's /search?q=. */
+export const TERMS = "q";
 const SORT_BY = "sort_by";
 const AVAILABILITY = "filter.v.availability";
 const PRICE_MIN = "filter.v.price.gte";
@@ -22,6 +56,8 @@ const PRICE_MAX = "filter.v.price.lte";
 /** A hand-made URL can't make the query any longer than a store's 25 filters could. */
 const MAX_VALUES = 25;
 const MAX_VALUE_LENGTH = 100;
+/** Longer than anyone types into a search box, short enough to keep cache keys small. */
+export const MAX_TERMS_LENGTH = 100;
 
 /** Prices a shopper typed, in the store's currency. Either end can be open. */
 export interface PriceBounds {
@@ -30,24 +66,36 @@ export interface PriceBounds {
 }
 
 /**
- * What a shopper narrowed a collection to. It lives in the URL, under the parameter names Liquid
- * themes use (filter.v.availability=1, filter.v.price.gte=100), so a link can be shared and the
+ * What a shopper narrowed a list to. It lives in the URL, under the parameter names Liquid themes
+ * use (q=linen, filter.v.availability=1, filter.v.price.gte=100), so a link can be shared and the
  * back button undoes a filter.
  */
-export interface Browse {
+export interface Browse<S extends Scope = Scope> {
+  scope: S;
+  /** What was searched for. Always empty for a collection. */
+  terms: string;
   /** The chosen values of every filter but price, as URL parameters, in a stable order. */
   values: Array<[string, string]>;
   price: PriceBounds;
-  sortBy: SortBy;
+  sortBy: SortBy<S>;
 }
 
-export const DEFAULT_BROWSE: Browse = { values: [], price: {}, sortBy: DEFAULT_SORT };
+/** Nothing chosen yet: the whole list, in its own order. */
+export function defaultBrowse<S extends Scope>(scope: S, terms = ""): Browse<S> {
+  return {
+    scope,
+    terms: scope === "search" ? cleanTerms(terms) : "",
+    values: [],
+    price: {},
+    sortBy: DEFAULT_SORT[scope],
+  };
+}
 
 /**
  * Reads the browse state from a URL, dropping anything it doesn't know. Each value has a parameter
  * of its own: Liquid also allows `red,blue`, but a comma can be part of a value.
  */
-export function readBrowse(params: URLSearchParams): Browse {
+export function readBrowse<S extends Scope>(params: URLSearchParams, scope: S): Browse<S> {
   const values: Array<[string, string]> = [];
   for (const [key, raw] of params) {
     const value = raw.trim();
@@ -63,25 +111,33 @@ export function readBrowse(params: URLSearchParams): Browse {
 
   const sort = params.get(SORT_BY);
   return {
+    ...defaultBrowse(scope, params.get(TERMS) ?? ""),
     values: chosen.slice(0, MAX_VALUES),
     price: priceBounds(amount(params.get(PRICE_MIN)), amount(params.get(PRICE_MAX))),
-    sortBy: sort && Object.hasOwn(SORTS, sort) ? (sort as SortBy) : DEFAULT_SORT,
+    ...(sort && Object.hasOwn(SORTS[scope], sort) && { sortBy: sort as SortBy<S> }),
   };
 }
 
+/** Search terms as Shopify gets them: trimmed, single-spaced and cut to a sane length. */
+export function cleanTerms(raw: string): string {
+  return raw.trim().replace(/\s+/g, " ").slice(0, MAX_TERMS_LENGTH);
+}
+
 /** The Storefront API arguments for a browse state. Values of one filter match any of them. */
-export function queryFor({ values, price, sortBy }: Browse) {
+export function queryFor<S extends Scope>({ scope, values, price, sortBy }: Browse<S>) {
   const filters = values.flatMap(([key, value]) => filterFor(key, value) ?? []);
   if (price.min !== undefined || price.max !== undefined) filters.push({ price });
-  return { filters, ...SORTS[sortBy] };
+  const sorts: { [K in Scope]: Record<SortBy<K>, Sort<SortKeys[K]>> } = SORTS;
+  return { filters, ...sorts[scope][sortBy] };
 }
 
 /** The query string for a browse state, without the default sort: "" when nothing is chosen. */
-export function searchFor({ values, price, sortBy }: Browse): string {
-  const params = new URLSearchParams(values);
+export function searchFor({ scope, terms, values, price, sortBy }: Browse): string {
+  // The terms lead, as they say what the page is.
+  const params = new URLSearchParams(terms ? [[TERMS, terms], ...values] : values);
   if (price.min !== undefined) params.set(PRICE_MIN, String(price.min));
   if (price.max !== undefined) params.set(PRICE_MAX, String(price.max));
-  if (sortBy !== DEFAULT_SORT) params.set(SORT_BY, sortBy);
+  if (sortBy !== DEFAULT_SORT[scope]) params.set(SORT_BY, sortBy);
   const search = params.toString();
   return search ? `?${search}` : "";
 }

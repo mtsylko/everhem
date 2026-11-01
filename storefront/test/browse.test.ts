@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  DEFAULT_BROWSE,
+  cleanTerms,
+  defaultBrowse,
   facetsFrom,
   isChosen,
   isNarrowed,
@@ -12,7 +13,11 @@ import {
 } from "../src/lib/product/browse";
 
 function read(search: string) {
-  return readBrowse(new URLSearchParams(search));
+  return readBrowse(new URLSearchParams(search), "collection");
+}
+
+function readSearch(search: string) {
+  return readBrowse(new URLSearchParams(search), "search");
 }
 
 describe("readBrowse", () => {
@@ -22,6 +27,8 @@ describe("readBrowse", () => {
         "filter.v.option.Color=Black&filter.v.availability=1&filter.v.price.gte=100&sort_by=price-ascending",
       ),
     ).toEqual({
+      scope: "collection",
+      terms: "",
       values: [
         ["filter.v.availability", "1"],
         ["filter.v.option.Color", "Black"],
@@ -34,7 +41,13 @@ describe("readBrowse", () => {
   it("drops what it doesn't know, empty fields and repeats", () => {
     expect(
       read("filter.v.colour=red&utm_source=x&filter.v.price.lte=&filter.p.tag=a&filter.p.tag=a"),
-    ).toEqual({ values: [["filter.p.tag", "a"]], price: {}, sortBy: "manual" });
+    ).toEqual({
+      scope: "collection",
+      terms: "",
+      values: [["filter.p.tag", "a"]],
+      price: {},
+      sortBy: "manual",
+    });
     expect(read("sort_by=constructor").sortBy).toBe("manual");
     expect(read("filter.v.availability=yes").values).toEqual([]);
   });
@@ -61,6 +74,24 @@ describe("readBrowse", () => {
     });
     expect(read("filter.v.price.gte=-5&filter.v.price.lte=abc").price).toEqual({});
   });
+
+  it("takes only the sorts its list has", () => {
+    expect(read("sort_by=relevance").sortBy).toBe("manual");
+    expect(readSearch("sort_by=manual").sortBy).toBe("relevance");
+    expect(readSearch("sort_by=price-descending").sortBy).toBe("price-descending");
+  });
+
+  it("reads search terms for a search only", () => {
+    expect(readSearch("q=+black++hoodie+").terms).toBe("black hoodie");
+    expect(read("q=black").terms).toBe("");
+  });
+});
+
+describe("cleanTerms", () => {
+  it("trims, joins spaces and cuts long terms short", () => {
+    expect(cleanTerms("  merino \n scarf ")).toBe("merino scarf");
+    expect(cleanTerms("a".repeat(500))).toHaveLength(100);
+  });
 });
 
 describe("queryFor", () => {
@@ -84,10 +115,18 @@ describe("queryFor", () => {
   });
 
   it("asks for the collection's own order by default", () => {
-    expect(queryFor(DEFAULT_BROWSE)).toEqual({
+    expect(queryFor(defaultBrowse("collection"))).toEqual({
       filters: [],
       sortKey: "COLLECTION_DEFAULT",
       reverse: false,
+    });
+  });
+
+  it("ranks search results by relevance by default, and can sort them by price", () => {
+    expect(queryFor(defaultBrowse("search", "linen"))).toMatchObject({ sortKey: "RELEVANCE" });
+    expect(queryFor(readSearch("q=linen&sort_by=price-descending"))).toMatchObject({
+      sortKey: "PRICE",
+      reverse: true,
     });
   });
 });
@@ -99,8 +138,16 @@ describe("searchFor", () => {
   });
 
   it("leaves the default sort and an empty state out", () => {
-    expect(searchFor(DEFAULT_BROWSE)).toBe("");
+    expect(searchFor(defaultBrowse("collection"))).toBe("");
     expect(searchFor(read("sort_by=manual"))).toBe("");
+    expect(searchFor(readSearch("sort_by=relevance"))).toBe("");
+  });
+
+  it("puts a search's terms first, so filters keep them", () => {
+    expect(searchFor(readSearch("filter.v.availability=1&q=black+tee"))).toBe(
+      "?q=black+tee&filter.v.availability=1",
+    );
+    expect(searchFor({ ...readSearch("q=tee&filter.v.price.lte=50"), price: {} })).toBe("?q=tee");
   });
 });
 

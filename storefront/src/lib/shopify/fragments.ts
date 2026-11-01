@@ -53,6 +53,23 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
   }
 `;
 
+/** A filter Shopify offers for a list of products, with how many each value would leave. */
+export const FILTER_FRAGMENT = `#graphql
+  fragment Filter on Filter {
+    id
+    label
+    type
+    values {
+      label
+      count
+      input
+      swatch {
+        color
+      }
+    }
+  }
+`;
+
 /** Spreads Image and Money. */
 export const CART_FRAGMENT = `#graphql
   fragment Cart on Cart {

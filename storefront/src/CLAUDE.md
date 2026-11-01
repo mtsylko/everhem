@@ -24,19 +24,21 @@ before using an API you are not sure of. This code relies on:
 ## Current structure
 
 - `src/app/[locale]/` holds every route, the root layout included: home, `collections/[handle]`,
-  `products/[handle]`, `error.tsx`, `not-found.tsx`, and `[...missing]`, which sends unknown paths
-  to the 404 inside our own layout.
+  `products/[handle]`, `search`, `error.tsx`, `not-found.tsx`, and `[...missing]`, which sends
+  unknown paths to the 404 inside our own layout.
 - `src/proxy.ts` redirects a URL without a language to the shopper's (cookie, then Accept-Language).
 - `src/lib/shopify/`: `client.ts` (`storefront()`, the only way to call the API), `catalog.ts`
   (cached catalog reads), `cart.ts` (cart query and mutations), `fragments.ts`, `api-version.ts`
   (kept in step with the seed) and `image-loader.ts` (Shopify's CDN resizes images).
 - `src/lib/cart/`: `actions.ts` (Server Actions) and `get-cart.ts` (the request-time cart read).
 - `src/lib/product/` and `src/lib/money.ts`: pure logic for variants, featured tiles, colours,
-  filter URLs (`browse.ts`) and prices. No React and no Next.js in there, so `test/` can cover it.
+  filter and search URLs (`browse.ts`) and prices. No React and no Next.js in there, so `test/`
+  can cover it.
 - `src/i18n/`: locales, dictionaries, message formatting, `server.ts` for Server Components,
   `i18n-context.tsx` for Client Components, `metadata.ts` for hreflang.
-- `src/components/`: grouped by area (`cart/`, `collection/`, `home/`, `product/`), with shared
-  pieces at the top (`catalogue`, `product-tile`, `price`, `fields`).
+- `src/components/`: grouped by area (`cart/`, `collection/`, `home/`, `product/`, `search/`),
+  with shared pieces at the top (`catalogue`, `product-tile`, `price`, `fields`).
+  `collection/browse-listing.tsx` is the filtered grid that collections and search share.
 - `generated/`: GraphQL types from codegen. Never edit by hand.
 - `@/*` resolves to `src/*`. Generated types sit outside `src`, so they are imported relatively.
 
@@ -155,8 +157,9 @@ plainly. The tokens live in `@theme` in `src/app/globals.css`; there is no `tail
 - Sold-out products go last and never take a double tile; a sold-out size stays visible but
   crossed out.
 - Don't break URLs: `/[locale]/products/[handle]`, `/[locale]/collections/[handle]` (`all` holds
-  every product), the `?color=&size=` query, and the collection's Liquid-style
-  `?filter.…=&sort_by=` query.
+  every product), `/[locale]/search?q=`, the `?color=&size=` query, and the Liquid-style
+  `?filter.…=&sort_by=` query that collections and search share. Each list has its own sorts
+  (`SORTS` in `browse.ts`).
 - Filters come from Shopify (`products.filters`), not from code: the form renders whatever the
   store's Search & Discovery settings offer.
 

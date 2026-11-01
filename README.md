@@ -6,8 +6,8 @@ This repository holds two parts:
 
 - **`seed/`** fills a Shopify development store with a realistic clothing catalog through the
   Admin GraphQL API.
-- **`storefront/`** is a headless Next.js 16 store on the Storefront API: catalog, collection
-  and product pages, a cart, and Shopify's own checkout.
+- **`storefront/`** is a headless Next.js 16 store on the Storefront API: catalog, collection,
+  product and search pages, a cart, and Shopify's own checkout.
 
 ## What the seed creates
 
@@ -175,14 +175,20 @@ npm run start -w storefront     # serve the production build
 
 - **Pages are static, the cart and filtered lists are not.** With Cache Components, catalog reads
   are cached functions (`"use cache"`, one `catalog` tag) and every page prerenders at build time.
-  The cart and a collection's product list are read per request: they stream into the static
-  shell inside Suspense.
+  The cart, a collection's product list and search results are read per request: they stream
+  into the static shell inside Suspense.
 - **Shopify filters and sorts the collections.** A collection page sends the shopper's choice to
   the Storefront API (`filters`, `sortKey`) and builds its filter form from the filters Shopify
   returns, with a count for each value. The choice lives in the URL under Liquid's parameter
   names (`?filter.v.availability=1&filter.v.price.gte=100&sort_by=price-ascending`), so a link
   can be shared and the back button undoes a filter. The form is a plain GET form, so it works
   before JavaScript loads. Each choice is a cache entry of its own.
+- **Search runs on Shopify's search** (`search`), with the same filters, sort and URL as a
+  collection, plus the terms in `?q=`. Results follow as the shopper types: a pause in typing
+  replaces the URL, so the back button leaves the page instead of stepping through every word.
+  Shopify's search also matches loosely: after the close matches come related products, and even
+  a made-up word finds a few. Results pages are marked `noindex`, as they only repeat the
+  collections.
 - **Which filters exist is set in the admin.** Without the free
   [Search & Discovery](https://apps.shopify.com/search-and-discovery) app, Shopify offers
   availability and price. Install it and add filters (Color and Size, for example) under
@@ -200,6 +206,10 @@ npm run start -w storefront     # serve the production build
 - **Merchandising comes from the admin.** A product with an `everhem.featured` value takes one of
   the grid's double tiles, labelled with that reason. Featured products fill every seventh place,
   and a sold-out one stays single.
+- **"You may also like" is Shopify's.** A product page shows Shopify's related products
+  (`productRecommendations`), which Shopify works out from sales, descriptions and collections,
+  and which Search & Discovery can change. Sold-out ones are left out. A product Shopify has none
+  for yet shows the rest of its collection.
 - **Types come from codegen**, as in the seed: `npm run codegen -w storefront` checks every
   query against the Storefront API schema.
 
@@ -242,8 +252,8 @@ seed/
 └── test/
 storefront/
 ├── src/
-│   ├── app/[locale]/   # routes per language: home, collections/[handle], products/[handle]
-│   ├── components/     # tiles, catalogue grid, filter form, product picker, cart drawer, home sections
+│   ├── app/[locale]/   # routes per language: home, collections/[handle], products/[handle], search
+│   ├── components/     # tiles, catalogue grid, filter form, search box, product picker, cart drawer, home sections
 │   ├── i18n/           # locales, dictionaries, message formatting
 │   ├── lib/            # Storefront API client and queries, cart actions, variant and filter logic, money
 │   └── proxy.ts        # sends a URL without a language to the shopper's own
