@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { format } from "@/i18n/format";
 import { localePath } from "@/i18n/locales";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { ALL_COLLECTION, getCollections } from "@/lib/shopify/catalog";
+import { HERO_PHOTO_CREDIT } from "./home/hero";
 
 const REPOSITORY = "https://github.com/mtsylko/everhem";
 
@@ -18,7 +20,14 @@ export async function Footer() {
     <footer className="mt-section grid grid-cols-2 gap-2 p-2 lg:grid-cols-12">
       <div className="rise order-6 col-span-2 flex flex-col justify-between gap-8 bg-surface p-5 md:col-span-1 lg:order-none lg:col-span-4 lg:h-56 lg:p-6">
         <p className="text-lead">{footer.about}</p>
-        <p className="text-small text-muted">{footer.fictional}</p>
+        <div className="space-y-1 text-small text-muted">
+          <p>{footer.fictional}</p>
+          <p>
+            <a href={HERO_PHOTO_CREDIT.url} className="underline-offset-4 hover:underline">
+              {format(footer.photoCredit, { author: HERO_PHOTO_CREDIT.author })}
+            </a>
+          </p>
+        </div>
       </div>
 
       <nav

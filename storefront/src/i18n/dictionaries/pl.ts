@@ -127,6 +127,7 @@ export const pl: Dictionary = {
     about: "Everhem to sklep demonstracyjny: headless frontend w\u00a0Next.js na Shopify.",
     fictional:
       "Marka jest fikcyjna. Zamówienia trafiają do deweloperskiego sklepu Shopify i\u00a0nigdy nie są wysyłane.",
+    photoCredit: "Zdjęcie na stronie głównej: {author}, Unsplash.",
     builtWith: "Zbudowane w\u00a0Next.js 16, React 19 i\u00a0Shopify Storefront API.",
     source: "Kod na GitHubie",
   },

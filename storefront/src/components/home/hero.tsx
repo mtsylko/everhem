@@ -1,35 +1,42 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import type { CollectionsQuery } from "../../../generated/storefront.generated";
 import { format } from "@/i18n/format";
 import { localePath } from "@/i18n/locales";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { formatMoney, lowestPrice } from "@/lib/money";
-import { fieldFor } from "../fields";
+import mistyHills from "./misty-hills.webp";
 
 type Collection = CollectionsQuery["collections"]["nodes"][number];
 
 interface HeroProps {
-  /** Product pictures for the wall, in catalogue order. */
-  images: readonly { url: string }[];
   collections: readonly Collection[];
 }
 
-const ROWS = 8;
-const TILES_PER_ROW = 14;
+/** Who took the hero photo, for the credit in the footer. */
+export const HERO_PHOTO_CREDIT = {
+  author: "Francesco Gallarotti",
+  url: "https://unsplash.com/photos/-HkuuUSY1pE",
+};
 
-/** The whole catalogue as a wall of specimens, with one panel that says what it is. */
-export async function Hero({ images, collections }: HeroProps) {
+/** A quiet landscape under one panel that says what the store is. */
+export async function Hero({ collections }: HeroProps) {
   const [locale, dictionary] = await Promise.all([getLocale(), getDictionary()]);
   const { home } = dictionary;
 
   return (
-    <section
-      aria-labelledby="hero-title"
-      className="flex flex-col [--tile:22vw] [--wall-space:62svh] md:relative md:[--tile:7.8vw] md:[--wall-space:max(38rem,100svh_-_4.5rem)]"
-    >
-      <Wall images={images} />
+    <section aria-labelledby="hero-title" className="flex flex-col md:relative">
+      {/* The oatmeal field stands in for the mist until the photo arrives. */}
+      <div
+        aria-hidden="true"
+        className="relative h-[62svh] bg-oatmeal md:h-[max(38rem,100svh-4.5rem)]"
+      >
+        {/*
+          A soft photo, 43 KB at 2560 px, so it ships as one file. The loader only resizes
+          Shopify's images, and unoptimized says so instead of a srcset of identical URLs.
+        */}
+        <Image src={mistyHills} alt="" fill preload unoptimized className="object-cover" />
+      </div>
 
       <div className="grid gap-x-8 gap-y-5 bg-ink p-5 text-ground md:absolute md:bottom-6 md:left-1/2 md:w-[min(64rem,calc(100%-2*var(--spacing-gutter)))] md:-translate-x-1/2 md:grid-cols-[1fr_auto] md:items-end md:p-8">
         <h1 id="hero-title" className="text-title font-medium text-balance md:col-span-2">
@@ -66,48 +73,5 @@ export async function Hero({ images, collections }: HeroProps) {
         </ul>
       </div>
     </section>
-  );
-}
-
-function Wall({ images }: { images: HeroProps["images"] }) {
-  if (images.length === 0) return null;
-
-  const rows = Array.from({ length: ROWS }, (_, row) =>
-    Array.from(
-      { length: TILES_PER_ROW },
-      (_, column) => images[(row * 5 + column) % images.length]!,
-    ),
-  );
-
-  return (
-    <div
-      aria-hidden="true"
-      className="wall flex flex-col gap-(--wall-gap) overflow-hidden"
-      style={{ "--wall-rows": ROWS } as CSSProperties}
-    >
-      {rows.map((tiles, row) => (
-        <div
-          key={row}
-          // Every other row is set half a tile to the left, like courses of brick.
-          className={`flex w-max shrink-0 gap-(--wall-gap) ${row % 2 ? "-ml-[calc(var(--tile)/2)]" : ""}`}
-        >
-          {tiles.map((image, index) => (
-            <div
-              key={index}
-              className={`relative size-(--tile) shrink-0 overflow-hidden ${fieldFor(row + index)}`}
-            >
-              <Image
-                src={image.url}
-                alt=""
-                fill
-                sizes="(min-width: 768px) 8vw, 22vw"
-                loading={row < 4 ? "eager" : "lazy"}
-                className="object-cover mix-blend-multiply"
-              />
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
   );
 }

@@ -114,6 +114,7 @@ export const en = {
     label: "Footer",
     about: "Everhem is a demo store: a headless Next.js storefront on Shopify.",
     fictional: "A fictional brand. Orders go to a Shopify development store and are never shipped.",
+    photoCredit: "Home page photo by {author} on Unsplash.",
     builtWith: "Built with Next.js 16, React 19 and the Shopify Storefront API.",
     source: "Source on GitHub",
   },

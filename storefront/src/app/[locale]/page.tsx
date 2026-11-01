@@ -35,7 +35,7 @@ export default async function Home() {
 
   return (
     <>
-      <Hero images={images} collections={collections} />
+      <Hero collections={collections} />
 
       <section id="catalogue" aria-labelledby="catalogue-title" className="px-gutter pt-section">
         {/* Laid out like a collection's heading: the lead starts on the grid's third column. */}
