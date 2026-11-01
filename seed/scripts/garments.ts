@@ -63,16 +63,23 @@ export interface Drawing {
 
 /** Draws a product's garment in one view. Painting it is then cheap for every color. */
 export function drawGarment(look: Look, view: ImageView): Drawing {
+  const { layers, folds } = placeGarment(look, view);
+  return { layers, shading: shading(layers, folds, look.texture) };
+}
+
+/** Lays a product's garment out in the image in one view, before the costly shading. */
+export function placeGarment(look: Look, view: ImageView): Design {
   const { layers, folds } = design(look, view === "front");
   const { place, scale } = frame(layers.filter((layer) => layer.piece).flatMap((l) => l.shape));
-  const placed = layers.map((layer) => ({ ...layer, shape: layer.shape.map(place) }));
-  const placedFolds = folds.map((fold) => ({
-    ...fold,
-    from: place(fold.from),
-    to: place(fold.to),
-    width: fold.width * scale,
-  }));
-  return { layers: placed, shading: shading(placed, placedFolds, look.texture) };
+  return {
+    layers: layers.map((layer) => ({ ...layer, shape: layer.shape.map(place) })),
+    folds: folds.map((fold) => ({
+      ...fold,
+      from: place(fold.from),
+      to: place(fold.to),
+      width: fold.width * scale,
+    })),
+  };
 }
 
 /** Paints a drawing in one color as 8-bit RGB. */

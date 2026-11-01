@@ -15,6 +15,7 @@ import {
   selectionToParams,
   type Selection,
 } from "@/lib/product/variants";
+import { cropSquare } from "@/lib/shopify/image-loader";
 import { useCart } from "../cart/cart-context";
 import { fieldFor } from "../fields";
 
@@ -22,6 +23,12 @@ export type Product = NonNullable<ProductQuery["product"]>;
 type Picture = Product["images"]["nodes"][number];
 
 const COLOR = "Color";
+
+// Where a colour swatch looks on its variant's photo, as fractions of the photo. It sits right of
+// the centre line, where zips, buttons and drawstrings run, and fits inside the leg of a sock, as a
+// pair of socks leaves the backdrop showing at the centre. The seed's placeholder test keeps every
+// garment's fabric here.
+const SWATCH = { x: 0.615, y: 0.47, side: 0.125 };
 
 /** The selection lives in the URL, so a link to a colour and size opens on that variant. */
 function useSelection(product: Product): [Selection, (name: string, value: string) => void] {
@@ -221,17 +228,17 @@ function OptionValue({
   const status = available ? null : <span className="sr-only"> {soldOutLabel}</span>;
 
   if (picture) {
-    // A colour swatch is its own garment, zoomed in until only the fabric shows.
+    // A colour swatch is a close-up of its own garment, so it shows the fabric as well as the colour.
     return (
       <label className="cursor-pointer">
         {input}
         <span className="relative block size-12 overflow-hidden bg-oatmeal outline-offset-2 peer-checked:outline-2 peer-checked:outline-ink peer-focus-visible:outline-3 peer-focus-visible:outline-accent">
           <Image
-            src={picture.url}
+            src={cropSquare(picture, SWATCH.x, SWATCH.y, SWATCH.side)}
             alt=""
             fill
             sizes="48px"
-            className={`scale-[4] object-cover object-[50%_55%] mix-blend-multiply ${available ? "" : "opacity-40"}`}
+            className={`object-cover mix-blend-multiply ${available ? "" : "opacity-40"}`}
           />
         </span>
         <span className="sr-only">
