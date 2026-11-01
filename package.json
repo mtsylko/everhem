@@ -1,8 +1,8 @@
 {
-  "name": "everhem",
+  "name": "plainweft",
   "private": true,
   "type": "module",
-  "description": "Demo Shopify store for Everhem, a minimal everyday basics brand",
+  "description": "Demo Shopify store for Plainweft, a minimal everyday basics brand",
   "author": "mtsylko",
   "license": "MIT",
   "workspaces": [

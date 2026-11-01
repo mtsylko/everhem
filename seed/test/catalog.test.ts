@@ -6,7 +6,7 @@ import { validateCatalog } from "../src/catalog/validate.ts";
 import { planVariants } from "../src/catalog/variants.ts";
 import type { CatalogProduct } from "../src/catalog/types.ts";
 
-describe("Everhem catalog", () => {
+describe("Plainweft catalog", () => {
   it("is valid", () => {
     expect(validateCatalog(products, collections, colors)).toEqual([]);
   });

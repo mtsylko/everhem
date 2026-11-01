@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     // hreflang links and shared images need absolute URLs.
     metadataBase: SITE_URL,
-    title: { default: meta.title, template: "%s · Everhem" },
+    title: { default: meta.title, template: "%s · Plainweft" },
     description: meta.description,
     openGraph: openGraph(locale),
     // A link shared on X shows the wide picture, as it does everywhere else.

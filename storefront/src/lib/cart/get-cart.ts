@@ -5,7 +5,7 @@ import { getLocale } from "@/i18n/server";
 import { buyerIp } from "../buyer-ip";
 import { fetchCart } from "../shopify/cart";
 
-export const CART_COOKIE = "everhem_cart";
+export const CART_COOKIE = "plainweft_cart";
 
 /** Request-time data: render whatever reads it inside a Suspense boundary. */
 export async function getCart() {

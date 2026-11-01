@@ -1,8 +1,8 @@
 {
-  "name": "@everhem/seed",
+  "name": "@plainweft/seed",
   "private": true,
   "type": "module",
-  "description": "Seeds the Everhem demo store through the Shopify Admin GraphQL API",
+  "description": "Seeds the Plainweft demo store through the Shopify Admin GraphQL API",
   "scripts": {
     "seed": "node --env-file-if-exists=.env src/cli.ts seed",
     "teardown": "node --env-file-if-exists=.env src/cli.ts teardown",

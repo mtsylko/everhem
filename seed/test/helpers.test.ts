@@ -52,8 +52,8 @@ describe("missingPublications", () => {
 
 describe("isSeeded", () => {
   it("needs both the seed tag and the checksum metafield", () => {
-    expect(isSeeded({ tags: ["everhem-seed"], seedChecksum: { value: "sha256:x" } })).toBe(true);
-    expect(isSeeded({ tags: ["everhem-seed"], seedChecksum: null })).toBe(false);
+    expect(isSeeded({ tags: ["plainweft-seed"], seedChecksum: { value: "sha256:x" } })).toBe(true);
+    expect(isSeeded({ tags: ["plainweft-seed"], seedChecksum: null })).toBe(false);
     expect(isSeeded({ tags: [], seedChecksum: { value: "sha256:x" } })).toBe(false);
   });
 });
@@ -115,18 +115,18 @@ describe("mapPool", () => {
 
 describe("isRevalidation", () => {
   it("knows the storefront's route at any address", () => {
-    expect(isRevalidation({ uri: "https://everhem.vercel.app/api/revalidate" })).toBe(true);
+    expect(isRevalidation({ uri: "https://plainweft.vercel.app/api/revalidate" })).toBe(true);
     expect(isRevalidation({ uri: "https://preview.example.com/api/revalidate" })).toBe(true);
   });
 
   it("leaves other endpoints alone", () => {
-    expect(isRevalidation({ uri: "https://everhem.vercel.app/api/orders" })).toBe(false);
+    expect(isRevalidation({ uri: "https://plainweft.vercel.app/api/orders" })).toBe(false);
     expect(isRevalidation({ uri: "not a url" })).toBe(false);
   });
 });
 
 describe("planWebhooks", () => {
-  const uri = "https://everhem.vercel.app/api/revalidate";
+  const uri = "https://plainweft.vercel.app/api/revalidate";
   const changeFor = (plan: ReturnType<typeof planWebhooks>, topic: string) =>
     plan.find((planned) => planned.topic === topic);
 

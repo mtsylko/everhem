@@ -1,6 +1,6 @@
 # Storefront
 
-You are editing `@everhem/storefront`: a headless Next.js 16.4 store on the Shopify Storefront API,
+You are editing `@plainweft/storefront`: a headless Next.js 16.4 store on the Shopify Storefront API,
 with React 19.3 (React Compiler on), TypeScript strict, Tailwind v4 and Vitest. The README's
 "Storefront" section explains how the store works; this file is how to change it.
 
@@ -79,8 +79,8 @@ Use the Shopify AI Toolkit (`shopify-dev-mcp`) to look up and validate Storefron
   regexes, quantity bounds). The locale arrives as an argument (`localeOf`), since an action can't
   read the URL. Return a `CartActionState` with a translated notice instead of throwing, and call
   `refresh()` after a change.
-- **The data comes from `seed/`.** Metafields `everhem.fabric`, `everhem.care` (a JSON list in a
-  string) and `everhem.featured` are defined there with Storefront access. A new field or
+- **The data comes from `seed/`.** Metafields `plainweft.fabric`, `plainweft.care` (a JSON list in a
+  string) and `plainweft.featured` are defined there with Storefront access. A new field or
   translation starts in the seed, not here.
 - **Option names stay English in Shopify** (`Color`, `Size`), and the code matches on them. Their
   labels come from `dictionary.product.options`.

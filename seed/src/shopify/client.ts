@@ -40,7 +40,7 @@ export function createShopifyClient({
     apiVersion: API_VERSION,
     // Covers network-level 429 and 503. Cost throttling is handled below.
     retries: 2,
-    userAgentPrefix: "everhem-seed",
+    userAgentPrefix: "plainweft-seed",
   });
   const knownCosts = new Map<string, number>();
 

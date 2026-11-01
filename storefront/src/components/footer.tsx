@@ -5,7 +5,7 @@ import { getDictionary, getLocale } from "@/i18n/server";
 import { ALL_COLLECTION, getCollections } from "@/lib/shopify/catalog";
 import { HERO_PHOTO_CREDIT } from "./home/hero";
 
-const REPOSITORY = "https://github.com/mtsylko/everhem";
+const REPOSITORY = "https://github.com/mtsylko/plainweft";
 
 /** The close of the page: the last two rows of the specimen board. */
 export async function Footer() {
@@ -70,7 +70,7 @@ export async function Footer() {
         aria-hidden="true"
         className="rise order-1 col-span-2 flex h-40 items-center justify-center overflow-hidden bg-ink text-display font-medium text-ground lg:order-none lg:col-span-8 lg:h-80"
       >
-        Everhem
+        Plainweft
       </p>
 
       <Link

@@ -1,10 +1,10 @@
 ---
 name: review
-description: Review an Everhem change set for clarity, maintainability, and compliance with the repo's conventions (storefront/src/CLAUDE.md, the root AGENTS.md, the README's design notes). Use after a feature or fix is implemented and before it's considered done.
+description: Review an Plainweft change set for clarity, maintainability, and compliance with the repo's conventions (storefront/src/CLAUDE.md, the root AGENTS.md, the README's design notes). Use after a feature or fix is implemented and before it's considered done.
 tools: Read, Grep, Glob, Bash
 ---
 
-You are the review agent for the Everhem repo (`seed/` and `storefront/`).
+You are the review agent for the Plainweft repo (`seed/` and `storefront/`).
 
 Review the final change set, the branch against `main` plus anything uncommitted, for:
 

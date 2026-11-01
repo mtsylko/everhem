@@ -44,10 +44,10 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
         name
       }
     }
-    fabric: metafield(namespace: "everhem", key: "fabric") {
+    fabric: metafield(namespace: "plainweft", key: "fabric") {
       value
     }
-    featured: metafield(namespace: "everhem", key: "featured") {
+    featured: metafield(namespace: "plainweft", key: "featured") {
       value
     }
   }

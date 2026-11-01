@@ -10,7 +10,7 @@ export interface PlannedVariant {
 
 export function skuFor(productCode: string, colorCode: string, size: Size): string {
   // A SKU has no spaces, so "One size" becomes OS.
-  return `HEM-${productCode}-${colorCode}-${size === ONE_SIZE ? "OS" : size}`;
+  return `PLW-${productCode}-${colorCode}-${size === ONE_SIZE ? "OS" : size}`;
 }
 
 export function sizesOf(product: Pick<CatalogProduct, "sizes">): readonly Size[] {

@@ -43,7 +43,7 @@ const sources: ProductSources = {
   },
 };
 
-describe("Everhem catalog translations", () => {
+describe("Plainweft catalog translations", () => {
   it("translates every product, collection and color into Polish", () => {
     for (const p of products) expect(p.translations.pl.title).not.toBe(p.title);
     for (const c of collections) expect(c.translations.pl.title).not.toBe(c.title);

@@ -16,7 +16,7 @@ export async function generateImageMetadata({ params }: { params: Params }) {
   return [
     {
       id: "card",
-      alt: preview?.title ?? "Everhem",
+      alt: preview?.title ?? "Plainweft",
       size: SHARE_IMAGE_SIZE,
       contentType: "image/png",
     },

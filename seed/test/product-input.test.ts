@@ -28,11 +28,11 @@ describe("buildProductSetInput", () => {
     expect(input).toMatchObject({
       handle: "linen-blend-tee",
       title: "Linen Blend Tee",
-      vendor: "Everhem",
+      vendor: "Plainweft",
       status: "ACTIVE",
       collections: ["gid://shopify/Collection/1"],
     });
-    expect(input.tags).toEqual(["everhem-seed", "linen", "sale"]);
+    expect(input.tags).toEqual(["plainweft-seed", "linen", "sale"]);
   });
 
   it("declares color and size options", () => {
@@ -52,7 +52,7 @@ describe("buildProductSetInput", () => {
 
     const [first] = variants;
     expect(first).toMatchObject({
-      sku: "HEM-LBT-SND-XS",
+      sku: "PLW-LBT-SND-XS",
       price: "149.00",
       compareAtPrice: "179.00",
       inventoryPolicy: "DENY",
@@ -77,28 +77,28 @@ describe("buildProductSetInput", () => {
 
   it("reuses ids of existing variants", () => {
     const variants = build(new Map([["Sage/M", "gid://shopify/ProductVariant/7"]])).variants ?? [];
-    expect(variants.find((v) => v.sku === "HEM-LBT-SGE-M")?.id).toBe(
+    expect(variants.find((v) => v.sku === "PLW-LBT-SGE-M")?.id).toBe(
       "gid://shopify/ProductVariant/7",
     );
-    expect(variants.find((v) => v.sku === "HEM-LBT-SND-M")?.id).toBeUndefined();
+    expect(variants.find((v) => v.sku === "PLW-LBT-SND-M")?.id).toBeUndefined();
   });
 
   it("stores fabric, care steps and the checksum as metafields", () => {
     expect(build().metafields).toEqual([
       {
-        namespace: "everhem",
+        namespace: "plainweft",
         key: "fabric",
         type: "single_line_text_field",
         value: "55% linen, 45% cotton",
       },
       {
-        namespace: "everhem",
+        namespace: "plainweft",
         key: "care",
         type: "list.single_line_text_field",
         value: JSON.stringify(product.care),
       },
       {
-        namespace: "everhem_seed",
+        namespace: "plainweft_seed",
         key: "checksum",
         type: "single_line_text_field",
         value: "sha256:abc",
@@ -117,7 +117,7 @@ describe("buildProductSetInput", () => {
       checksum: "sha256:abc",
     });
     expect(input.metafields).toContainEqual({
-      namespace: "everhem",
+      namespace: "plainweft",
       key: "featured",
       type: "single_line_text_field",
       value: "Bestseller",

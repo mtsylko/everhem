@@ -57,8 +57,8 @@ describe("readBrowse", () => {
   });
 
   it("keeps a value whole when it has a comma in it", () => {
-    expect(read("filter.p.m.everhem.fabric=55%25+linen%2C+45%25+cotton").values).toEqual([
-      ["filter.p.m.everhem.fabric", "55% linen, 45% cotton"],
+    expect(read("filter.p.m.plainweft.fabric=55%25+linen%2C+45%25+cotton").values).toEqual([
+      ["filter.p.m.plainweft.fabric", "55% linen, 45% cotton"],
     ]);
   });
 
@@ -99,12 +99,12 @@ describe("queryFor", () => {
     expect(
       queryFor(
         read(
-          "filter.v.availability=1&filter.v.option.Size=M&filter.p.m.everhem.fabric=Linen&filter.v.price.lte=300&sort_by=created-descending",
+          "filter.v.availability=1&filter.v.option.Size=M&filter.p.m.plainweft.fabric=Linen&filter.v.price.lte=300&sort_by=created-descending",
         ),
       ),
     ).toEqual({
       filters: [
-        { productMetafield: { namespace: "everhem", key: "fabric", value: "Linen" } },
+        { productMetafield: { namespace: "plainweft", key: "fabric", value: "Linen" } },
         { available: true },
         { variantOption: { name: "Size", value: "M" } },
         { price: { max: 300 } },
