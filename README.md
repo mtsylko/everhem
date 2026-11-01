@@ -27,6 +27,8 @@ This repository holds two parts:
 - Polish as a second store language: turned on, published, and added to the markets that sell in
   English, with a translation of every product, collection, colour, fabric, care step and image
   alt text
+- Webhook subscriptions that tell the deployed storefront when a product, a collection or stock
+  changes, once `STOREFRONT_URL` is set
 
 ## Setup
 
@@ -91,7 +93,10 @@ Logs are readable lines in a terminal and JSON lines elsewhere. Set `LOG_FORMAT=
 - **Teardown only deletes what the seed created.** A resource needs both the `everhem-seed` tag
   and the checksum metafield to count. If the store already has a product or collection with a
   catalog handle, the seed stops instead of overwriting it. Translations go with their products;
-  the Polish language stays on, since it is a store setting.
+  the Polish language stays on, since it is a store setting. Webhook subscriptions count as the
+  seed's when they call the storefront's `/api/revalidate`.
+- **A new storefront address moves the webhooks.** The seed points each subscription at the
+  current `STOREFRONT_URL` instead of adding a second one.
 
 ### Translations
 
@@ -160,8 +165,12 @@ The storefront reads the catalog with a Storefront API token from Shopify's **He
    **private access token**. Its permissions need to cover reading products, collections and
    metafields, and writing carts.
 3. **Fill in the environment.** Copy `storefront/.env.example` to `storefront/.env.local`, then
-   set the store domain and the private token.
+   set the store domain and the private token. `SHOPIFY_WEBHOOK_SECRET` is the seed's
+   `SHOPIFY_CLIENT_SECRET`.
 4. **Run the seed once more.** It publishes the catalog to the new Headless channel.
+5. **Once the storefront is deployed, subscribe it to changes.** Set `STOREFRONT_URL` in
+   `seed/.env` to its `https://` address and run the seed again. Shopify can't call `localhost`,
+   so a local storefront relies on the cache running out instead.
 
 ### Commands
 
@@ -177,6 +186,15 @@ npm run start -w storefront     # serve the production build
   are cached functions (`"use cache"`, one `catalog` tag) and every page prerenders at build time.
   The cart, a collection's product list and search results are read per request: they stream
   into the static shell inside Suspense.
+- **An edit in the admin reaches the site within seconds.** Shopify sends a webhook to
+  `/api/revalidate` when a product, a collection or stock changes. The route checks Shopify's
+  HMAC signature, made with the app's client secret over the raw body, and expires the `catalog`
+  tag (`revalidateTag` with `expire: 0`), so the next visit renders with fresh data instead of
+  serving the old page once more. The Storefront API can go on answering with the old data for a
+  few seconds after the webhook, and a visit in that window would cache it again, so the route
+  expires the tag a second time a minute later (`after`). `cacheLife("hours")` stays as the
+  fallback for a webhook that never arrives. Translations have no webhook, so an edited Polish
+  text shows once the cache runs out.
 - **Shopify filters and sorts the collections.** A collection page sends the shopper's choice to
   the Storefront API (`filters`, `sortKey`) and builds its filter form from the filters Shopify
   returns, with a count for each value. The choice lives in the URL under Liquid's parameter
@@ -252,7 +270,7 @@ seed/
 │   ├── catalog/        # pure functions: variants, stock, images, checksums, productSet input, translations
 │   ├── shopify/        # auth, typed client, cost limiter, error helpers
 │   ├── steps/          # preflight, locales, metafield definitions, collections, uploads, products,
-│   │                   # publishing, translations
+│   │                   # publishing, translations, webhooks
 │   ├── seed.ts
 │   ├── teardown.ts
 │   └── cli.ts
@@ -261,6 +279,7 @@ seed/
 storefront/
 ├── src/
 │   ├── app/[locale]/   # routes per language: home, collections/[handle], products/[handle], search
+│   ├── app/api/        # revalidate: takes Shopify's webhooks and expires the cached catalog
 │   ├── components/     # tiles, catalogue grid, filter form, search box, product picker, cart drawer, home sections
 │   ├── i18n/           # locales, dictionaries, message formatting
 │   ├── lib/            # Storefront API client and queries, cart actions, variant and filter logic, money

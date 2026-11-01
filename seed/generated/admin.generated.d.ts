@@ -158,6 +158,37 @@ export type StagedUploadsMutation = { stagedUploadsCreate?: AdminTypes.Maybe<{ s
       & { parameters: Array<Pick<AdminTypes.StagedUploadParameter, 'name' | 'value'>> }
     )>>, userErrors: Array<Pick<AdminTypes.UserError, 'field' | 'message'>> }> };
 
+export type WebhookSubscriptionsQueryVariables = AdminTypes.Exact<{ [key: string]: never; }>;
+
+
+export type WebhookSubscriptionsQuery = { webhookSubscriptions: { nodes: Array<Pick<AdminTypes.WebhookSubscription, 'id' | 'topic' | 'uri'>> } };
+
+export type CreateWebhookSubscriptionMutationVariables = AdminTypes.Exact<{
+  topic: AdminTypes.WebhookSubscriptionTopic;
+  uri: AdminTypes.Scalars['String']['input'];
+}>;
+
+
+export type CreateWebhookSubscriptionMutation = { webhookSubscriptionCreate?: AdminTypes.Maybe<{ webhookSubscription?: AdminTypes.Maybe<Pick<AdminTypes.WebhookSubscription, 'id'>>, userErrors: Array<Pick<AdminTypes.UserError, 'field' | 'message'>> }> };
+
+export type UpdateWebhookSubscriptionMutationVariables = AdminTypes.Exact<{
+  id: AdminTypes.Scalars['ID']['input'];
+  uri: AdminTypes.Scalars['String']['input'];
+}>;
+
+
+export type UpdateWebhookSubscriptionMutation = { webhookSubscriptionUpdate?: AdminTypes.Maybe<{ webhookSubscription?: AdminTypes.Maybe<Pick<AdminTypes.WebhookSubscription, 'id'>>, userErrors: Array<Pick<AdminTypes.UserError, 'field' | 'message'>> }> };
+
+export type DeleteWebhookSubscriptionMutationVariables = AdminTypes.Exact<{
+  id: AdminTypes.Scalars['ID']['input'];
+}>;
+
+
+export type DeleteWebhookSubscriptionMutation = { webhookSubscriptionDelete?: AdminTypes.Maybe<(
+    Pick<AdminTypes.WebhookSubscriptionDeletePayload, 'deletedWebhookSubscriptionId'>
+    & { userErrors: Array<Pick<AdminTypes.UserError, 'field' | 'message'>> }
+  )> };
+
 export type SeededProductsQueryVariables = AdminTypes.Exact<{
   query: AdminTypes.Scalars['String']['input'];
   after?: AdminTypes.InputMaybe<AdminTypes.Scalars['String']['input']>;
@@ -209,6 +240,7 @@ interface GeneratedQueryTypes {
   "#graphql\n  query ProductByHandle($handle: String!, $namespace: String!, $key: String!) {\n    productByIdentifier(identifier: { handle: $handle }) {\n      id\n      tags\n      seedChecksum: metafield(namespace: $namespace, key: $key) {\n        value\n      }\n      variants(first: 100) {\n        nodes {\n          id\n          selectedOptions {\n            name\n            value\n          }\n        }\n      }\n      resourcePublicationsV2(first: 25) {\n        nodes {\n          publication {\n            id\n          }\n        }\n      }\n    }\n  }\n": {return: ProductByHandleQuery, variables: ProductByHandleQueryVariables},
   "#graphql\n  query ProductTranslationSources(\n    $handle: String!\n    $namespace: String!\n    $fabricKey: String!\n    $careKey: String!\n  ) {\n    productByIdentifier(identifier: { handle: $handle }) {\n      id\n      options {\n        name\n        optionValues {\n          id\n          name\n        }\n      }\n      fabric: metafield(namespace: $namespace, key: $fabricKey) {\n        id\n      }\n      care: metafield(namespace: $namespace, key: $careKey) {\n        id\n      }\n      media(first: 20) {\n        nodes {\n          id\n          alt\n        }\n      }\n    }\n  }\n": {return: ProductTranslationSourcesQuery, variables: ProductTranslationSourcesQueryVariables},
   "#graphql\n  query TranslatableResources($ids: [ID!]!, $first: Int!, $locale: String!) {\n    translatableResourcesByIds(resourceIds: $ids, first: $first) {\n      nodes {\n        resourceId\n        translatableContent {\n          key\n          digest\n        }\n        translations(locale: $locale) {\n          key\n          value\n          outdated\n        }\n      }\n    }\n  }\n": {return: TranslatableResourcesQuery, variables: TranslatableResourcesQueryVariables},
+  "#graphql\n  query WebhookSubscriptions {\n    webhookSubscriptions(first: 100) {\n      nodes {\n        id\n        topic\n        uri\n      }\n    }\n  }\n": {return: WebhookSubscriptionsQuery, variables: WebhookSubscriptionsQueryVariables},
   "#graphql\n  query SeededProducts($query: String!, $after: String, $namespace: String!, $key: String!) {\n    products(first: 50, after: $after, query: $query) {\n      nodes {\n        id\n        handle\n        tags\n        seedChecksum: metafield(namespace: $namespace, key: $key) {\n          value\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n": {return: SeededProductsQuery, variables: SeededProductsQueryVariables},
 }
 
@@ -222,6 +254,9 @@ interface GeneratedMutationTypes {
   "#graphql\n  mutation Publish($id: ID!, $input: [PublicationInput!]!) {\n    publishablePublish(id: $id, input: $input) {\n      userErrors {\n        field\n        message\n      }\n    }\n  }\n": {return: PublishMutation, variables: PublishMutationVariables},
   "#graphql\n  mutation RegisterTranslations($resourceId: ID!, $translations: [TranslationInput!]!) {\n    translationsRegister(resourceId: $resourceId, translations: $translations) {\n      translations {\n        key\n      }\n      userErrors {\n        field\n        message\n        code\n      }\n    }\n  }\n": {return: RegisterTranslationsMutation, variables: RegisterTranslationsMutationVariables},
   "#graphql\n  mutation StagedUploads($input: [StagedUploadInput!]!) {\n    stagedUploadsCreate(input: $input) {\n      stagedTargets {\n        url\n        resourceUrl\n        parameters {\n          name\n          value\n        }\n      }\n      userErrors {\n        field\n        message\n      }\n    }\n  }\n": {return: StagedUploadsMutation, variables: StagedUploadsMutationVariables},
+  "#graphql\n  mutation CreateWebhookSubscription($topic: WebhookSubscriptionTopic!, $uri: String!) {\n    webhookSubscriptionCreate(topic: $topic, webhookSubscription: { uri: $uri }) {\n      webhookSubscription {\n        id\n      }\n      userErrors {\n        field\n        message\n      }\n    }\n  }\n": {return: CreateWebhookSubscriptionMutation, variables: CreateWebhookSubscriptionMutationVariables},
+  "#graphql\n  mutation UpdateWebhookSubscription($id: ID!, $uri: String!) {\n    webhookSubscriptionUpdate(id: $id, webhookSubscription: { uri: $uri }) {\n      webhookSubscription {\n        id\n      }\n      userErrors {\n        field\n        message\n      }\n    }\n  }\n": {return: UpdateWebhookSubscriptionMutation, variables: UpdateWebhookSubscriptionMutationVariables},
+  "#graphql\n  mutation DeleteWebhookSubscription($id: ID!) {\n    webhookSubscriptionDelete(id: $id) {\n      deletedWebhookSubscriptionId\n      userErrors {\n        field\n        message\n      }\n    }\n  }\n": {return: DeleteWebhookSubscriptionMutation, variables: DeleteWebhookSubscriptionMutationVariables},
   "#graphql\n  mutation DeleteProduct($id: ID!) {\n    productDelete(input: { id: $id }, synchronous: true) {\n      deletedProductId\n      userErrors {\n        field\n        message\n      }\n    }\n  }\n": {return: DeleteProductMutation, variables: DeleteProductMutationVariables},
   "#graphql\n  mutation DeleteCollection($id: ID!) {\n    collectionDelete(input: { id: $id }) {\n      deletedCollectionId\n      userErrors {\n        field\n        message\n      }\n    }\n  }\n": {return: DeleteCollectionMutation, variables: DeleteCollectionMutationVariables},
   "#graphql\n  mutation DeleteMetafieldDefinition($identifier: MetafieldDefinitionIdentifierInput!) {\n    metafieldDefinitionDelete(identifier: $identifier, deleteAllAssociatedMetafields: true) {\n      deletedDefinitionId\n      userErrors {\n        field\n        message\n        code\n      }\n    }\n  }\n": {return: DeleteMetafieldDefinitionMutation, variables: DeleteMetafieldDefinitionMutationVariables},

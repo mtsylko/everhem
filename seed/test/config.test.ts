@@ -44,4 +44,20 @@ describe("loadConfig", () => {
       /SHOPIFY_CLIENT_SECRET/,
     );
   });
+
+  it("reads the storefront's address as an origin", () => {
+    const env = { SHOPIFY_STORE_DOMAIN: "everhem-demo", SHOPIFY_ADMIN_TOKEN: "shpat_1" };
+    expect(loadConfig(env).storefrontUrl).toBeUndefined();
+    expect(
+      loadConfig({ ...env, STOREFRONT_URL: "https://everhem.vercel.app/" }).storefrontUrl,
+    ).toBe("https://everhem.vercel.app");
+  });
+
+  it("refuses a storefront address Shopify can't call", () => {
+    const env = { SHOPIFY_STORE_DOMAIN: "everhem-demo", SHOPIFY_ADMIN_TOKEN: "shpat_1" };
+    expect(() => loadConfig({ ...env, STOREFRONT_URL: "http://localhost:3000" })).toThrow(
+      /STOREFRONT_URL/,
+    );
+    expect(() => loadConfig({ ...env, STOREFRONT_URL: "everhem.vercel.app" })).toThrow(ConfigError);
+  });
 });
