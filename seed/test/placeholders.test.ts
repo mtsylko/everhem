@@ -1,6 +1,7 @@
 import { inflateSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { drawGarment, HEIGHT, paintGarment, WIDTH } from "../scripts/garments.ts";
+import { products } from "../catalog/products.ts";
+import { drawGarment, HEIGHT, paintGarment, placeGarment, WIDTH } from "../scripts/garments.ts";
 import { encodePng, crc32 } from "../scripts/png.ts";
 import { addSpan, blur, Canvas, crossingsAt, Mask } from "../scripts/raster.ts";
 import { noise, surface } from "../scripts/texture.ts";
@@ -139,5 +140,25 @@ describe("drawGarment", () => {
     expect(widthOf({ garment: "tee", fit: "boxy", texture: "jersey" })).toBeGreaterThan(
       widthOf({ garment: "tee", fit: "regular", texture: "jersey" }) + 40,
     );
+  });
+
+  // The product page's colour swatch is this square of the photo (SWATCH in the storefront's
+  // product-client.tsx), so a redrawn garment mustn't leave the backdrop showing there.
+  it("keeps fabric where the colour swatch looks", () => {
+    const side = WIDTH * 0.125;
+    const [left, top] = [WIDTH * 0.615 - side / 2, HEIGHT * 0.47 - side / 2];
+    for (const product of products) {
+      const mask = new Mask(WIDTH, HEIGHT);
+      for (const layer of placeGarment(product, "front").layers) {
+        if (layer.piece) mask.fill(layer.shape);
+      }
+      let bare = 0;
+      for (let y = Math.floor(top); y < top + side; y++) {
+        for (let x = Math.floor(left); x < left + side; x++) {
+          if ((mask.data[y * WIDTH + x] as number) < 0.99) bare++;
+        }
+      }
+      expect(bare, product.handle).toBe(0);
+    }
   });
 });
