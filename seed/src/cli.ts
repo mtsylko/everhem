@@ -61,7 +61,9 @@ async function main(): Promise<void> {
   logger.info("run.start", { command, store: config.storeDomain, apiVersion: API_VERSION, dryRun });
   const startedAt = Date.now();
   const outcomes: Outcome[] =
-    command === "seed" ? await seed(ctx, { concurrency }) : await teardown(ctx);
+    command === "seed"
+      ? await seed(ctx, { concurrency, storefrontUrl: config.storefrontUrl })
+      : await teardown(ctx);
 
   logger.info("run.summary", { durationMs: Date.now() - startedAt, ...summarize(outcomes) });
   if (command === "teardown" && dryRun) {

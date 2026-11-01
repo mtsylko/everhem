@@ -1,4 +1,7 @@
-import type { MetafieldDefinitionValidationInput } from "../generated/admin.types.js";
+import type {
+  MetafieldDefinitionValidationInput,
+  WebhookSubscriptionTopic,
+} from "../generated/admin.types.js";
 import { FEATURE_REASONS } from "./catalog/types.ts";
 
 /** Every product the seeder creates gets this tag. Teardown searches by it. */
@@ -44,6 +47,24 @@ export const PRODUCT_METAFIELDS = {
     ] as MetafieldDefinitionValidationInput[],
   },
 } as const;
+
+/** The storefront's Route Handler for webhooks (storefront/src/app/api/revalidate). */
+export const REVALIDATE_PATH = "/api/revalidate";
+
+/**
+ * The changes that put the storefront's cached catalog out of date. products/update also fires
+ * when a product is ordered or a variant changes, and inventory_levels/update covers stock edited
+ * by hand. Translations have no topic: an edited Polish text shows once the cache runs out.
+ */
+export const WEBHOOK_TOPICS = [
+  "PRODUCTS_CREATE",
+  "PRODUCTS_UPDATE",
+  "PRODUCTS_DELETE",
+  "COLLECTIONS_CREATE",
+  "COLLECTIONS_UPDATE",
+  "COLLECTIONS_DELETE",
+  "INVENTORY_LEVELS_UPDATE",
+] as const satisfies readonly WebhookSubscriptionTopic[];
 
 /** Bump to update every resource on the next run, e.g. after changing how inputs are built. */
 export const SEED_VERSION = 1;

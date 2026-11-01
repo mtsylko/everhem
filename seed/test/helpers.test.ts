@@ -3,6 +3,7 @@ import { summarize } from "../src/outcome.ts";
 import { missingScopes, pickLocation } from "../src/steps/preflight.ts";
 import { missingPublications } from "../src/steps/publish.ts";
 import { buildUploadForm } from "../src/steps/uploads.ts";
+import { isRevalidation, planWebhooks } from "../src/steps/webhooks.ts";
 import { isSeeded } from "../src/teardown.ts";
 import { mapPool } from "../src/util/pool.ts";
 
@@ -109,5 +110,59 @@ describe("mapPool", () => {
       }),
     ).rejects.toThrow("boom");
     expect(started).toEqual([1, 2]);
+  });
+});
+
+describe("isRevalidation", () => {
+  it("knows the storefront's route at any address", () => {
+    expect(isRevalidation({ uri: "https://everhem.vercel.app/api/revalidate" })).toBe(true);
+    expect(isRevalidation({ uri: "https://preview.example.com/api/revalidate" })).toBe(true);
+  });
+
+  it("leaves other endpoints alone", () => {
+    expect(isRevalidation({ uri: "https://everhem.vercel.app/api/orders" })).toBe(false);
+    expect(isRevalidation({ uri: "not a url" })).toBe(false);
+  });
+});
+
+describe("planWebhooks", () => {
+  const uri = "https://everhem.vercel.app/api/revalidate";
+  const changeFor = (plan: ReturnType<typeof planWebhooks>, topic: string) =>
+    plan.find((planned) => planned.topic === topic);
+
+  it("subscribes every topic on a new store", () => {
+    const plan = planWebhooks([], uri);
+    expect(plan.length).toBeGreaterThan(0);
+    expect(plan.every((planned) => planned.change === "create")).toBe(true);
+  });
+
+  it("keeps a subscription that already calls the route", () => {
+    const plan = planWebhooks([{ id: "1", topic: "PRODUCTS_UPDATE", uri }], uri);
+    expect(changeFor(plan, "PRODUCTS_UPDATE")).toEqual({
+      topic: "PRODUCTS_UPDATE",
+      change: "keep",
+      id: "1",
+    });
+  });
+
+  it("moves a subscription from an earlier address instead of adding one", () => {
+    const old = {
+      id: "2",
+      topic: "PRODUCTS_UPDATE",
+      uri: "https://old.example.com/api/revalidate",
+    };
+    expect(changeFor(planWebhooks([old], uri), "PRODUCTS_UPDATE")).toEqual({
+      topic: "PRODUCTS_UPDATE",
+      change: "update",
+      id: "2",
+    });
+    expect(
+      changeFor(planWebhooks([old, { ...old, id: "3", uri }], uri), "PRODUCTS_UPDATE"),
+    ).toEqual({ topic: "PRODUCTS_UPDATE", change: "keep", id: "3" });
+  });
+
+  it("ignores the app's other subscriptions", () => {
+    const other = { id: "4", topic: "PRODUCTS_UPDATE", uri: "https://example.com/hooks" };
+    expect(changeFor(planWebhooks([other], uri), "PRODUCTS_UPDATE")?.change).toBe("create");
   });
 });

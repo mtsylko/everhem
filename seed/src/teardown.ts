@@ -7,6 +7,7 @@ import { assertNoUserErrors } from "./shopify/errors.ts";
 import { COLLECTION_BY_HANDLE } from "./steps/collections.ts";
 import { PRODUCT_METAFIELD_DEFINITIONS } from "./steps/metafield-definitions.ts";
 import { PRODUCT_BY_HANDLE } from "./steps/products.ts";
+import { DELETE_WEBHOOK, isRevalidation, WEBHOOK_SUBSCRIPTIONS } from "./steps/webhooks.ts";
 
 const SEEDED_PRODUCTS = `#graphql
   query SeededProducts($query: String!, $after: String, $namespace: String!, $key: String!) {
@@ -79,15 +80,33 @@ export function isSeeded(product: Pick<ProductCandidate, "tags" | "seedChecksum"
 }
 
 /**
- * Removes everything the seeder created: products (with their media),
- * collections and metafield definitions. Anything not marked as ours is left alone.
+ * Removes everything the seeder created: products (with their media), collections, metafield
+ * definitions and webhook subscriptions. Anything not marked as ours is left alone.
  */
 export async function teardown(ctx: RunContext): Promise<Outcome[]> {
   return [
     ...(await deleteProducts(ctx)),
     ...(await deleteCollections(ctx)),
     ...(await deleteMetafieldDefinitions(ctx)),
+    // Last, so the storefront is still subscribed while the products and collections go.
+    ...(await deleteWebhooks(ctx)),
   ];
+}
+
+async function deleteWebhooks({ client, logger, dryRun }: RunContext): Promise<Outcome[]> {
+  const { webhookSubscriptions } = await client.request(WEBHOOK_SUBSCRIPTIONS);
+  const outcomes: Outcome[] = [];
+
+  for (const { id, topic, uri } of webhookSubscriptions.nodes.filter(isRevalidation)) {
+    if (!dryRun) {
+      const { webhookSubscriptionDelete } = await client.request(DELETE_WEBHOOK, { id });
+      assertNoUserErrors(`unsubscribe ${topic}`, webhookSubscriptionDelete?.userErrors);
+    }
+    const action = dryRun ? "would-delete" : "deleted";
+    logger.info(`webhook.${action}`, { topic, uri });
+    outcomes.push({ resource: "webhook", handle: topic, action });
+  }
+  return outcomes;
 }
 
 async function deleteProducts(ctx: RunContext): Promise<Outcome[]> {

@@ -10,6 +10,7 @@ import { ensureMetafieldDefinitions } from "./steps/metafield-definitions.ts";
 import { preflight } from "./steps/preflight.ts";
 import { syncProduct } from "./steps/products.ts";
 import { syncTranslations } from "./steps/translations.ts";
+import { ensureWebhooks } from "./steps/webhooks.ts";
 import { mapPool } from "./util/pool.ts";
 
 const IMAGES_DIR = fileURLToPath(new URL("../catalog/images", import.meta.url));
@@ -17,9 +18,14 @@ const IMAGES_DIR = fileURLToPath(new URL("../catalog/images", import.meta.url));
 export interface SeedOptions {
   /** Products synced in parallel. The cost limiter keeps them inside the rate limit. */
   concurrency: number;
+  /** The storefront to send catalog changes to, if it is deployed. */
+  storefrontUrl: string | undefined;
 }
 
-export async function seed(ctx: RunContext, { concurrency }: SeedOptions): Promise<Outcome[]> {
+export async function seed(
+  ctx: RunContext,
+  { concurrency, storefrontUrl }: SeedOptions,
+): Promise<Outcome[]> {
   const problems = validateCatalog(products, collections, colors);
   if (problems.length > 0) throw new Error(`Catalog is invalid:\n- ${problems.join("\n- ")}`);
 
@@ -32,6 +38,14 @@ export async function seed(ctx: RunContext, { concurrency }: SeedOptions): Promi
   );
 
   const translations = await syncTranslations(ctx, concurrency);
+  const webhooks = await ensureWebhooks(ctx, storefrontUrl);
 
-  return [...locales, ...definitions, ...collectionOutcomes, ...productOutcomes, ...translations];
+  return [
+    ...locales,
+    ...definitions,
+    ...collectionOutcomes,
+    ...productOutcomes,
+    ...translations,
+    ...webhooks,
+  ];
 }
