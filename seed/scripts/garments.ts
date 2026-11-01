@@ -31,11 +31,14 @@ type Paint = (base: Rgb) => Rgb;
 
 interface Layer {
   shape: Point[];
-  paint: Paint;
+  /** Left out for a layer that only changes the shading, like a panel with its own grain. */
+  paint?: Paint;
   /** A piece of the garment, like the body or a sleeve: it gets an outline and casts the shadow. */
   piece?: boolean;
   /** For a rib trim, the direction its ribs run in. */
   ribs?: Point;
+  /** For a panel knitted another way, like the foot of a sock, the direction its fabric runs in. */
+  grain?: Point;
 }
 
 /** A soft fold: a crease from `from` to `to`, with a lit ridge beside it. */
@@ -88,7 +91,7 @@ export function paintGarment({ layers, shading }: Drawing, hex: string): Uint8Ar
         );
       }
     }
-    canvas.fill(layer.shape, layer.paint(base));
+    if (layer.paint) canvas.fill(layer.shape, layer.paint(base));
   }
   canvas.shade(shading);
   return canvas.toRgb();
@@ -140,6 +143,12 @@ function shading(layers: Layer[], folds: Fold[], texture: Texture): Float32Array
     mask.fill(shape);
     return [{ coverage: mask.data, direction }];
   });
+  const panels = layers.flatMap(({ shape, grain }) => {
+    if (!grain) return [];
+    const mask = new Mask(WIDTH, HEIGHT);
+    mask.fill(shape);
+    return [{ coverage: mask.data, grain }];
+  });
 
   const out = new Float32Array(WIDTH * HEIGHT);
   for (let y = 0; y < HEIGHT; y++) {
@@ -159,7 +168,16 @@ function shading(layers: Layer[], folds: Fold[], texture: Texture): Float32Array
           fabric += share * RIB * ribs(x * direction[1] - y * direction[0], ribPeriod);
           ribbed += share;
         }
-        fabric += Math.max(0, 1 - ribbed) * surface(texture, x, y);
+        let turned = 0;
+        for (const { coverage, grain } of panels) {
+          const share = coverage[i] as number;
+          if (share === 0) continue;
+          // The surface runs down the image, so turn the pixel into the panel's own frame.
+          fabric +=
+            share * surface(texture, x * grain[1] - y * grain[0], x * grain[0] + y * grain[1]);
+          turned += share;
+        }
+        fabric += Math.max(0, 1 - ribbed - turned) * surface(texture, x, y);
         const light = LIGHT * (0.5 - y / HEIGHT);
         const edge = -EDGE * (1 - (form[i] as number));
         const fold = RIDGE * (ridge[i] as number) - CREASE * (crease[i] as number);
@@ -785,45 +803,67 @@ function scarf(): Design {
 /** A pair of socks laid flat side by side, heel and toe reinforced. Relaxed is a taller boot sock. */
 function socks({ fit }: Look): Design {
   const boot = fit === "relaxed";
-  const top = boot ? 8 : 16;
-  const [heel, instep] = boot ? [53, 71] : [54, 70];
+  // A real sock laid flat: the foot is about as tall as the leg is wide and 2.6 times as long, and
+  // the leg stands about 3.2 widths tall on a crew sock, 3.9 on a boot sock.
+  const width = boot ? 16 : 15;
+  const [back, front] = [54, 54 + width];
+  const [top, sole] = [boot ? 38 : 52, 100];
+  const instep = sole - width * 0.93;
+  const toe = back - 2 + width * 2.6;
+  const toeStart: Point = [toe - 9, instep + 1.5];
+  // The heel pocket bulges out behind the leg before it rounds into the sole.
+  const heelCorner = quad([back + 10, sole], [back - 3, sole], [back - 3, sole - 8]);
+  const heelBack = quad([back - 3, sole - 8], [back - 3, sole - 13], [back - 1.5, sole - 16]);
+  const toeCap = [
+    ...quad(toeStart, [toe, instep + 2], [toe, sole - 5]),
+    ...quad([toe, sole - 5], [toe, sole], [toe - 7, sole]).slice(1),
+  ];
   const sock: Point[] = [
-    [heel, top],
-    [instep, top],
-    [instep, 70],
-    ...quad([instep, 70], [instep + 3, 77], [84, 78]).slice(1),
-    ...quad([84, 78], [97, 79], [96, 89]).slice(1),
-    ...quad([96, 89], [95, 98], [84, 98]).slice(1),
-    [62, 98],
-    ...quad([62, 98], [heel - 1, 98], [heel - 1, 86]).slice(1),
+    [back, top],
+    [front, top],
+    ...quad([front, instep - 7], [front, instep], [front + 7, instep + 0.3]),
+    ...toeCap,
+    ...heelCorner,
+    ...heelBack.slice(1),
+    ...quad([back - 1.5, sole - 16], [back, sole - 19], [back, sole - 23]).slice(1),
   ];
   const heelPatch: Point[] = [
-    [heel - 1, 84],
-    ...quad([heel - 1, 86], [heel - 1, 98], [62, 98]).slice(1),
-    [64, 92],
-    [heel + 4, 84],
+    ...heelCorner,
+    ...heelBack.slice(1),
+    ...quad([back - 1.5, sole - 16], [back + 7, sole - 11], [back + 10, sole]).slice(1, -1),
   ];
   const toePatch: Point[] = [
-    [85, 78],
-    ...quad([85, 78], [97, 79], [96, 89]).slice(1),
-    ...quad([96, 89], [95, 98], [84, 98]).slice(1),
-    [83, 98],
-    [84, 88],
+    ...toeCap,
+    ...quad([toe - 7, sole], [toe - 11, sole - 7], toeStart).slice(1, -1),
+  ];
+  // Below the ankle the knit turns and runs along the foot. The panel reaches past the outline,
+  // where it changes nothing, so only its edge across the ankle matters.
+  const ankle: [Point, Point] = [
+    [back - 4, sole - 12],
+    [front + 3, instep - 7],
+  ];
+  const foot: Point[] = [
+    ...ankle,
+    [toe + 2, instep - 7],
+    [toe + 2, sole + 2],
+    [back - 4, sole + 2],
   ];
   return {
     layers: [
       ...mirror({ shape: sock, paint: BASE, piece: true }),
+      ...mirror({ shape: foot, grain: [1, 0] }),
       ...mirror({ shape: heelPatch, paint: tone(0.07) }),
       ...mirror({ shape: toePatch, paint: tone(0.07) }),
       ...mirror({
-        shape: rect(heel, top, instep, top + (boot ? 14 : 10)),
+        shape: rect(back, top, front, top + (boot ? 9 : 6)),
         paint: tone(0.05),
         ribs: [0, 1],
       }),
     ],
     folds: mirrorFolds([
-      { from: [instep - 1, 64], to: [instep - 7, 72], width: 1.2, depth: 0.5 },
-      { from: [70, 86], to: [80, 85], width: 1, depth: 0.3 },
+      // The crease where the knit turns hides the change of grain.
+      { from: lerp(...ankle, 0.35), to: lerp(...ankle, 0.85), width: 1.2, depth: 0.45 },
+      { from: [front + 3, sole - 6], to: [toe - 13, sole - 6.5], width: 1, depth: 0.3 },
     ]),
   };
 }
@@ -1030,13 +1070,14 @@ function symmetric(rightHalf: Point[]): Point[] {
 
 /** A layer drawn on the right, and its mirror image on the left. */
 function mirror(layer: Layer): Layer[] {
-  const { shape, ribs: direction } = layer;
+  const { shape, ribs: direction, grain } = layer;
   return [
     layer,
     {
       ...layer,
       shape: shape.map(flipX),
       ribs: direction && [-direction[0], direction[1]],
+      grain: grain && [-grain[0], grain[1]],
     },
   ];
 }
