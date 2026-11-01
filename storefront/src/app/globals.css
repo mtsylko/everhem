@@ -67,6 +67,17 @@
     scrollbar-gutter: stable;
   }
 
+  /*
+   * From md the header sticks to the top, one row tall or two when it wraps (up to about 110px).
+   * Scrolling to an anchor, or to whatever Tab lands on, stops below it, so the header never hides
+   * the focused element.
+   */
+  @media (width >= 48rem) {
+    html {
+      scroll-padding-top: 7.5rem;
+    }
+  }
+
   :focus-visible {
     outline: 3px solid var(--color-accent);
     outline-offset: 2px;

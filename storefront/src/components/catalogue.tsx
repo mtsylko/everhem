@@ -16,9 +16,11 @@ interface CatalogueProps {
   enterFrom?: number;
   /** Off when the shopper picked an order: featured products would jump out of it. */
   doubles?: boolean;
+  /** The tiles' heading level: h2 when the grid sits right under the page's h1. */
+  tileHeading?: "h2" | "h3";
 }
 
-export function Catalogue({ products, enterFrom, doubles = true }: CatalogueProps) {
+export function Catalogue({ products, enterFrom, doubles = true, tileHeading }: CatalogueProps) {
   // Sold-out pieces go last: they can't be bought, so they shouldn't lead the grid.
   const ordered = products.toSorted(
     (a, b) => Number(b.availableForSale) - Number(a.availableForSale),
@@ -38,6 +40,7 @@ export function Catalogue({ products, enterFrom, doubles = true }: CatalogueProp
           double={double}
           eager={index < FIRST_TILES}
           enterStep={enterFrom !== undefined && index < FIRST_TILES ? enterFrom + index : undefined}
+          heading={tileHeading}
         />
       ))}
     </ul>

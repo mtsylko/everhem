@@ -12,9 +12,11 @@ export async function Mosaic({ pictures }: { pictures: readonly [Picture, Pictur
   const { home } = await getDictionary();
 
   return (
+    // Rows grow past 6rem when a tile's text needs it: Polish copy, a narrow laptop, or a reader's
+    // own text spacing would otherwise cut the text off.
     <section
       aria-labelledby="mosaic-title"
-      className="mt-section grid grid-cols-2 gap-1.5 px-gutter lg:grid-cols-12 lg:grid-rows-[repeat(8,6rem)] lg:gap-2"
+      className="mt-section grid grid-cols-2 gap-1.5 px-gutter lg:grid-cols-12 lg:grid-rows-[repeat(8,minmax(6rem,auto))] lg:gap-2"
     >
       <h2
         id="mosaic-title"
@@ -23,7 +25,7 @@ export async function Mosaic({ pictures }: { pictures: readonly [Picture, Pictur
         {home.mosaicTitle}
       </h2>
 
-      <Tile className="col-span-2 aspect-[4/5] bg-oatmeal lg:col-span-6 lg:col-start-1 lg:row-span-5 lg:row-start-1 lg:aspect-auto">
+      <Tile className="col-span-2 aspect-[4/5] overflow-hidden bg-oatmeal lg:col-span-6 lg:col-start-1 lg:row-span-5 lg:row-start-1 lg:aspect-auto">
         <Image
           src={large.url}
           alt={large.altText ?? ""}
@@ -55,7 +57,7 @@ export async function Mosaic({ pictures }: { pictures: readonly [Picture, Pictur
         </ul>
       </Tile>
 
-      <Tile className="col-span-2 aspect-[16/10] bg-stone lg:col-span-6 lg:col-start-7 lg:row-span-3 lg:row-start-6 lg:aspect-auto">
+      <Tile className="col-span-2 aspect-[16/10] overflow-hidden bg-stone lg:col-span-6 lg:col-start-7 lg:row-span-3 lg:row-start-6 lg:aspect-auto">
         <Image
           src={wide.url}
           alt={wide.altText ?? ""}
@@ -68,6 +70,7 @@ export async function Mosaic({ pictures }: { pictures: readonly [Picture, Pictur
   );
 }
 
+/** A text tile stays unclipped, so a square one grows taller rather than cut its text off. */
 function Tile({ className, children }: { className: string; children: React.ReactNode }) {
-  return <div className={`rise relative overflow-hidden ${className}`}>{children}</div>;
+  return <div className={`rise relative ${className}`}>{children}</div>;
 }

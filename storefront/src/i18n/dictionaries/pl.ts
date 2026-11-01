@@ -120,6 +120,8 @@ export const pl: Dictionary = {
     oneMore: "Jedna sztuka więcej: {title}",
     quantity: "Liczba sztuk",
     remove: "Usuń",
+    quantityChanged: "{title}: liczba sztuk {quantity}.",
+    removed: "Usunięto z koszyka: {title}.",
     failed: "Coś poszło nie tak. Spróbuj ponownie.",
   },
   footer: {

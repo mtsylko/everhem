@@ -150,6 +150,11 @@ plainly. The tokens live in `@theme` in `src/app/globals.css`; there is no `tail
   `ease-out-expo`. Add `.rise-even` where neighbours differ in height, as tiles in a row do, so
   they rise together. All of it sits behind `prefers-reduced-motion`. Nothing moves on its own without
   a way to pause it (WCAG 2.2.2).
+- **Boxes that hold text grow with it**: `min-h-*` and `minmax(…,auto)` grid rows, never a fixed
+  `h-*` or `overflow-hidden` around text. Polish copy, laptops from 1024px and a reader's own text
+  spacing (WCAG 1.4.12) all need the room.
+- **Every state keeps its contrast**: text stays at 4.5:1 on hover too. An ink button turns
+  `bg-accent text-accent-ink` on hover; ground text on the teal is only 4.1:1.
 - **Arbitrary values are fine when nothing fits**: `aspect-[4/5]`, `max-w-[40ch]`,
   `[--enter-step:1]`. `style={{}}` is only for runtime values and custom properties a child reads.
 - **Icons are inline SVG** with `aria-hidden`, like the footer's arrow, and controls carry text
@@ -161,8 +166,14 @@ plainly. The tokens live in `@theme` in `src/app/globals.css`; there is no `tail
 
 - Semantic HTML first: a modal `<dialog>` for the bag, radios in a `<fieldset>` for options, `<dl>`
   for facts, `<del>` with an `sr-only` label for the old price, and `role="status"` for notices.
+- Headings don't skip a level: a product tile's heading sits one below its list's (`tileHeading`).
 - Focus shows through the global `:focus-visible` outline. A visually hidden input styles its
-  visible part with `peer-focus-visible`.
+  visible part with `peer-focus-visible`. `scroll-padding-top` keeps it clear of the sticky header.
+- Focus never falls to the page. Before an action removes the focused element (a bag line), move
+  focus somewhere that stays (the bag's title). Don't disable a button while its action runs, as
+  that drops focus too: mark it `aria-disabled` and ignore repeat presses.
+- A message that answers an action goes to a `role="status"` region that is mounted before the
+  message arrives; one inserted together with its text is often not read out.
 - Keep both layouts working: the grid is 2, 3 and 4 columns, and the gallery scrolls sideways on
   phones.
 - Sold-out products go last and never take a double tile; a sold-out size stays visible but

@@ -136,7 +136,7 @@ export function BrowseForm({ path, browse, lists, price, currency }: BrowseFormP
             />
             <button
               type="submit"
-              className="h-12 bg-ink px-5 font-medium text-ground transition-colors hover:bg-accent active:scale-[0.98]"
+              className="h-12 bg-ink px-5 font-medium text-ground transition-colors hover:bg-accent hover:text-accent-ink active:scale-[0.98]"
             >
               {words.apply}
             </button>

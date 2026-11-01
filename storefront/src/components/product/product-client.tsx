@@ -112,6 +112,7 @@ export function PurchaseView({
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isPending) return;
     if (!variant) {
       setNotice(words.chooseSize);
       sizes.current?.querySelector("input")?.focus();
@@ -174,7 +175,10 @@ export function PurchaseView({
       <div>
         <button
           type="submit"
-          disabled={!onSelect || isPending || soldOut}
+          // Only marked busy while adding: a disabled button drops focus, and the bag would have
+          // nowhere to hand it back to when it closes.
+          disabled={!onSelect || soldOut}
+          aria-disabled={isPending || undefined}
           className="w-full bg-accent px-6 py-4 font-medium text-accent-ink transition hover:bg-accent-strong active:scale-[0.98] disabled:bg-surface disabled:text-muted"
         >
           {soldOut ? words.soldOut : isPending ? words.adding : words.addToBag}
@@ -241,8 +245,9 @@ function OptionValue({
   return (
     <label className="cursor-pointer">
       {input}
+      {/* A sold-out size keeps its field on hover: grey on stone would fall below 4.5:1. */}
       <span
-        className={`grid h-12 min-w-14 place-items-center bg-surface px-3 transition-colors peer-checked:bg-ink peer-checked:text-ground peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent hover:bg-stone peer-checked:hover:bg-ink ${available ? "" : "text-muted line-through"}`}
+        className={`grid h-12 min-w-14 place-items-center bg-surface px-3 transition-colors peer-checked:bg-ink peer-checked:text-ground peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent peer-checked:hover:bg-ink ${available ? "hover:bg-stone" : "text-muted line-through"}`}
       >
         {value}
         {status}

@@ -24,7 +24,8 @@ export async function generateMetadata({
 }: PageProps<"/[locale]/collections/[handle]">): Promise<Metadata> {
   const { handle } = await params;
   const [collection, locale] = await Promise.all([getCollection(handle), getLocale()]);
-  if (!collection) return {};
+  // Thrown here, before the page streams, so the 404 has its own title and status.
+  if (!collection) notFound();
   const title = collection.seo.title ?? collection.title;
   const description = collection.seo.description ?? collection.description;
   return {

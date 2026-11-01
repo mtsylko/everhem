@@ -17,6 +17,8 @@ interface ProductTileProps {
   eager?: boolean;
   /** For a tile on the first screen: it enters with the page at this step, instead of on scroll. */
   enterStep?: number;
+  /** One level below the heading of the list the tile sits in. */
+  heading?: "h2" | "h3";
 }
 
 /**
@@ -32,6 +34,7 @@ export async function ProductTile({
   double = false,
   eager = false,
   enterStep,
+  heading: Heading = "h3",
 }: ProductTileProps) {
   const [locale, { product: words }] = await Promise.all([getLocale(), getDictionary()]);
   // Only the first picture: the next ones are mostly other colours, which would read as a recolour.
@@ -66,7 +69,8 @@ export async function ProductTile({
           {front && (
             <Image
               src={front.url}
-              alt={front.altText ?? product.title}
+              // The title is just below, inside the same link: an alt would say it a second time.
+              alt=""
               fill
               sizes={sizes}
               loading={eager ? "eager" : "lazy"}
@@ -82,7 +86,9 @@ export async function ProductTile({
           )}
         </div>
         <div className="pt-3">
-          <h3 className="font-medium underline-offset-4 group-hover:underline">{product.title}</h3>
+          <Heading className="font-medium underline-offset-4 group-hover:underline">
+            {product.title}
+          </Heading>
           <Price
             price={product.priceRange.minVariantPrice}
             compareAt={product.compareAtPriceRange.maxVariantPrice}

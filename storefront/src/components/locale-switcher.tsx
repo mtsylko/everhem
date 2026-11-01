@@ -39,8 +39,9 @@ function LocaleLinks({ search }: { search: string }) {
               onClick={() => remember(locale)}
               className="text-muted uppercase underline-offset-4 hover:text-ink hover:underline aria-[current]:text-ink"
             >
-              <span aria-hidden="true">{locale}</span>
-              <span className="sr-only">{LOCALE_NAMES[locale]}</span>
+              {/* The name starts with the code on screen ("PL Polski"), so voice control finds it. */}
+              {locale}
+              <span className="sr-only"> {LOCALE_NAMES[locale]}</span>
             </Link>
           </li>
         ))}

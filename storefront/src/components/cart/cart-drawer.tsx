@@ -16,6 +16,10 @@ export function CartDrawer() {
   const { isOpen, close } = useCart();
   const { cart } = useI18n().dictionary;
   const dialog = useRef<HTMLDialogElement>(null);
+  const title = useRef<HTMLHeadingElement>(null);
+  // What the last change did, for screen readers. The region stays mounted, even when the bag
+  // empties, so each new message is read out.
+  const [announcement, setAnnouncement] = useState("");
 
   // A modal <dialog> traps focus, closes on Escape and makes the page behind it inert.
   useEffect(() => {
@@ -28,7 +32,10 @@ export function CartDrawer() {
   return (
     <dialog
       ref={dialog}
-      onClose={close}
+      onClose={() => {
+        setAnnouncement("");
+        close();
+      }}
       onClick={(event) => {
         if (event.target === event.currentTarget) close();
       }}
@@ -37,7 +44,13 @@ export function CartDrawer() {
     >
       <div className="flex w-full flex-col">
         <div className="flex items-baseline justify-between px-gutter pt-6 pb-4">
-          <h2 id="cart-title" className="text-lead font-medium">
+          {/* Focus lands here when the line that held it is removed. */}
+          <h2
+            ref={title}
+            id="cart-title"
+            tabIndex={-1}
+            className="text-lead font-medium focus-visible:outline-none"
+          >
             {cart.title}
           </h2>
           <button type="button" onClick={close} className="underline-offset-4 hover:underline">
@@ -46,9 +59,12 @@ export function CartDrawer() {
         </div>
         {isOpen && (
           <Suspense fallback={<p className="px-gutter">{cart.loading}</p>}>
-            <CartContents />
+            <CartContents announce={setAnnouncement} onLineRemoved={() => title.current?.focus()} />
           </Suspense>
         )}
+        <p role="status" className="sr-only">
+          {announcement}
+        </p>
       </div>
     </dialog>
   );
@@ -56,7 +72,15 @@ export function CartDrawer() {
 
 type QuantityChange = { lineId: string; quantity: number };
 
-function CartContents() {
+function CartContents({
+  announce,
+  onLineRemoved,
+}: {
+  /** Reads a change out to screen readers. */
+  announce: (message: string) => void;
+  /** Called before a line leaves, so focus can move off it first. */
+  onLineRemoved: () => void;
+}) {
   const { cartPromise, close } = useCart();
   const { locale, dictionary } = useI18n();
   const cart = use(cartPromise);
@@ -71,11 +95,16 @@ function CartContents() {
   const [notice, setNotice] = useState<string | null>(null);
 
   function changeQuantity(lineId: string, quantity: number) {
+    const title = lines.find((line) => line.id === lineId)?.merchandise.product.title ?? "";
     setNotice(null);
+    // The button that was pressed goes with its line; without a new place, focus falls to the page.
+    if (quantity === 0) onLineRemoved();
     startTransition(async () => {
       setOptimisticLines({ lineId, quantity });
       const result = await setLineQuantity(lineId, quantity, locale);
       setNotice(result.notice);
+      const done = quantity === 0 ? dictionary.cart.removed : dictionary.cart.quantityChanged;
+      announce(result.notice ?? format(done, { title, quantity }));
     });
   }
 
@@ -86,7 +115,7 @@ function CartContents() {
         <Link
           href={localePath(locale, "/#catalogue")}
           onClick={close}
-          className="mt-6 inline-block bg-ink px-6 py-3 font-medium text-ground transition-colors hover:bg-accent active:scale-[0.98]"
+          className="mt-6 inline-block bg-ink px-6 py-3 font-medium text-ground transition-colors hover:bg-accent hover:text-accent-ink active:scale-[0.98]"
         >
           {dictionary.shopTheBasics}
         </Link>
@@ -102,11 +131,8 @@ function CartContents() {
         ))}
       </ul>
       <div className="bg-surface px-gutter pt-5 pb-6">
-        {notice && (
-          <p role="status" className="mb-4">
-            {notice}
-          </p>
-        )}
+        {/* Screen readers hear it from the bag's status line, so this one is only shown. */}
+        {notice && <p className="mb-4">{notice}</p>}
         <dl className="flex items-baseline justify-between text-lead">
           <dt>{dictionary.cart.subtotal}</dt>
           <dd className={`tabular-nums ${isPending ? "opacity-50" : ""}`}>
@@ -117,6 +143,10 @@ function CartContents() {
         <a
           href={cart.checkoutUrl}
           aria-disabled={isPending}
+          // pointer-events only stops the mouse; Enter would still follow the link.
+          onClick={(event) => {
+            if (isPending) event.preventDefault();
+          }}
           className="mt-5 block bg-accent px-6 py-4 text-center font-medium text-accent-ink transition-colors hover:bg-accent-strong active:scale-[0.98] aria-disabled:pointer-events-none aria-disabled:opacity-60"
         >
           {dictionary.cart.checkOut}
