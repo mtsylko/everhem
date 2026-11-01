@@ -67,11 +67,13 @@ async function CollectionHeading({ handle }: { handle: Promise<string> }) {
   if (!collection) notFound();
 
   return (
-    <div className="mb-12 grid gap-4 lg:grid-cols-12 lg:gap-2">
+    // The description starts where the grid's third column does, and its last line sits on the
+    // title's baseline, so the two read as one line of type.
+    <div className="mb-12 grid gap-4 lg:grid-cols-12 lg:items-baseline-last lg:gap-2">
       <h1 id="collection-title" className="enter text-head font-medium lg:col-span-6">
         {collection.title}
       </h1>
-      <p className="enter max-w-[40ch] self-end text-lead [--enter-step:1] lg:col-span-5 lg:col-start-8">
+      <p className="enter max-w-[40ch] text-lead text-pretty [--enter-step:1] lg:col-span-6 lg:col-start-7">
         {collection.description}
       </p>
     </div>
