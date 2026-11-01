@@ -4,7 +4,7 @@ import { ColourFinder } from "@/components/home/colour-finder";
 import { Hero } from "@/components/home/hero";
 import { Mosaic } from "@/components/home/mosaic";
 import { formatPlural } from "@/i18n/format";
-import { alternates } from "@/i18n/metadata";
+import { alternates, openGraph } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { groupByColour } from "@/lib/product/colours";
 import { getColourIndex, getCollections, getProducts } from "@/lib/shopify/catalog";
@@ -12,7 +12,11 @@ import { getColourIndex, getCollections, getProducts } from "@/lib/shopify/catal
 const COLOURS_SHOWN = 6;
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { alternates: alternates(await getLocale()) };
+  const [locale, { meta }] = await Promise.all([getLocale(), getDictionary()]);
+  return {
+    alternates: alternates(locale),
+    openGraph: { ...openGraph(locale), title: meta.title, description: meta.description },
+  };
 }
 
 export default async function Home() {

@@ -256,6 +256,25 @@ export type ProductHandlesQueryVariables = StorefrontTypes.Exact<{ [key: string]
 
 export type ProductHandlesQuery = { products: { nodes: Array<Pick<StorefrontTypes.Product, 'handle' | 'updatedAt'>> } };
 
+export type CollectionHandlesQueryVariables = StorefrontTypes.Exact<{ [key: string]: never; }>;
+
+
+export type CollectionHandlesQuery = { collections: { nodes: Array<Pick<StorefrontTypes.Collection, 'handle' | 'updatedAt'>> } };
+
+export type CollectionPreviewQueryVariables = StorefrontTypes.Exact<{
+  handle: StorefrontTypes.Scalars['String']['input'];
+  language?: StorefrontTypes.InputMaybe<StorefrontTypes.LanguageCode>;
+}>;
+
+
+export type CollectionPreviewQuery = { collection?: StorefrontTypes.Maybe<(
+    Pick<StorefrontTypes.Collection, 'title'>
+    & { products: { nodes: Array<(
+        Pick<StorefrontTypes.Product, 'availableForSale'>
+        & { featured?: StorefrontTypes.Maybe<Pick<StorefrontTypes.Metafield, 'value'>>, featuredImage?: StorefrontTypes.Maybe<Pick<StorefrontTypes.Image, 'url'>> }
+      )> } }
+  )> };
+
 export type ImageFragment = Pick<StorefrontTypes.Image, 'url' | 'altText' | 'width' | 'height'>;
 
 export type MoneyFragment = Pick<StorefrontTypes.MoneyV2, 'amount' | 'currencyCode'>;
@@ -304,6 +323,8 @@ interface GeneratedQueryTypes {
   "#graphql\n  query Recommendations($handle: String!, $language: LanguageCode)\n  @inContext(language: $language) {\n    productRecommendations(productHandle: $handle, intent: RELATED) {\n      ...ProductCard\n    }\n  }\n  #graphql\n  fragment ProductCard on Product {\n    id\n    handle\n    title\n    availableForSale\n    images(first: 3) {\n      nodes {\n        ...Image\n      }\n    }\n    priceRange {\n      minVariantPrice {\n        ...Money\n      }\n    }\n    compareAtPriceRange {\n      maxVariantPrice {\n        ...Money\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n      }\n    }\n    fabric: metafield(namespace: \"everhem\", key: \"fabric\") {\n      value\n    }\n    featured: metafield(namespace: \"everhem\", key: \"featured\") {\n      value\n    }\n  }\n\n  #graphql\n  fragment Image on Image {\n    url\n    altText\n    width\n    height\n  }\n\n  #graphql\n  fragment Money on MoneyV2 {\n    amount\n    currencyCode\n  }\n\n": {return: RecommendationsQuery, variables: RecommendationsQueryVariables},
   "#graphql\n  query ColourIndex($language: LanguageCode) @inContext(language: $language) {\n    products(first: 50, sortKey: BEST_SELLING) {\n      nodes {\n        handle\n        title\n        variants(first: 100) {\n          nodes {\n            availableForSale\n            selectedOptions {\n              name\n              value\n            }\n            image {\n              ...Image\n            }\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment Image on Image {\n    url\n    altText\n    width\n    height\n  }\n\n": {return: ColourIndexQuery, variables: ColourIndexQueryVariables},
   "#graphql\n  query ProductHandles {\n    products(first: 250) {\n      nodes {\n        handle\n        updatedAt\n      }\n    }\n  }\n": {return: ProductHandlesQuery, variables: ProductHandlesQueryVariables},
+  "#graphql\n  query CollectionHandles {\n    collections(first: 20, sortKey: ID) {\n      nodes {\n        handle\n        updatedAt\n      }\n    }\n  }\n": {return: CollectionHandlesQuery, variables: CollectionHandlesQueryVariables},
+  "#graphql\n  query CollectionPreview($handle: String!, $language: LanguageCode)\n  @inContext(language: $language) {\n    collection(handle: $handle) {\n      title\n      products(first: 100) {\n        nodes {\n          availableForSale\n          featured: metafield(namespace: \"everhem\", key: \"featured\") {\n            value\n          }\n          featuredImage {\n            url\n          }\n        }\n      }\n    }\n  }\n": {return: CollectionPreviewQuery, variables: CollectionPreviewQueryVariables},
 }
 
 interface GeneratedMutationTypes {

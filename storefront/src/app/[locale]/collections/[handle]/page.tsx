@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { BrowseListing } from "@/components/collection/browse-listing";
 import { formatPlural } from "@/i18n/format";
 import { localePath } from "@/i18n/locales";
-import { alternates } from "@/i18n/metadata";
+import { alternates, openGraph } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { readBrowse, toSearchParams } from "@/lib/product/browse";
 import {
@@ -23,13 +23,16 @@ export async function generateMetadata({
   params,
 }: PageProps<"/[locale]/collections/[handle]">): Promise<Metadata> {
   const { handle } = await params;
-  const collection = await getCollection(handle);
+  const [collection, locale] = await Promise.all([getCollection(handle), getLocale()]);
   if (!collection) return {};
+  const title = collection.seo.title ?? collection.title;
+  const description = collection.seo.description ?? collection.description;
   return {
-    title: collection.seo.title ?? collection.title,
-    description: collection.seo.description ?? collection.description,
+    title,
+    description,
     // Filtered addresses point search engines at the collection itself.
-    alternates: alternates(await getLocale(), `/collections/${handle}`),
+    alternates: alternates(locale, `/collections/${handle}`),
+    openGraph: { ...openGraph(locale), title, description },
   };
 }
 

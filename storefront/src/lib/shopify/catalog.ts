@@ -1,7 +1,7 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { getLocale } from "@/i18n/server";
-import { languageCode } from "@/i18n/locales";
+import { languageCode, type Locale } from "@/i18n/locales";
 import { defaultBrowse, queryFor, type Browse } from "@/lib/product/browse";
 import { storefront } from "./client";
 import {
@@ -282,6 +282,37 @@ const PRODUCT_HANDLES_QUERY = `#graphql
   }
 `;
 
+const COLLECTION_HANDLES_QUERY = `#graphql
+  query CollectionHandles {
+    collections(first: 20, sortKey: ID) {
+      nodes {
+        handle
+        updatedAt
+      }
+    }
+  }
+`;
+
+const COLLECTION_PREVIEW_QUERY = `#graphql
+  query CollectionPreview($handle: String!, $language: LanguageCode)
+  @inContext(language: $language) {
+    collection(handle: $handle) {
+      title
+      products(first: 100) {
+        nodes {
+          availableForSale
+          featured: metafield(namespace: "everhem", key: "featured") {
+            value
+          }
+          featuredImage {
+            url
+          }
+        }
+      }
+    }
+  }
+`;
+
 export async function getCollections() {
   "use cache";
   cacheLife("hours");
@@ -388,4 +419,28 @@ export async function getProductHandles() {
   cacheTag(CATALOG_TAG);
   const { products } = await storefront(PRODUCT_HANDLES_QUERY);
   return products.nodes;
+}
+
+/** Collection pages, including the one of every product. Handles are the same in every language. */
+export async function getCollectionHandles() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(CATALOG_TAG);
+  const { collections } = await storefront(COLLECTION_HANDLES_QUERY);
+  return collections.nodes.filter((collection) => !HIDDEN_COLLECTIONS.has(collection.handle));
+}
+
+/**
+ * What a collection's shared image shows: its title and its first pictures. The locale is passed
+ * in, as images are Route Handlers, which can't read the URL's language the way pages do.
+ */
+export async function getCollectionPreview(handle: string, locale: Locale) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(CATALOG_TAG);
+  const { collection } = await storefront(COLLECTION_PREVIEW_QUERY, {
+    handle,
+    language: languageCode(locale),
+  });
+  return collection && !HIDDEN_COLLECTIONS.has(handle) ? collection : null;
 }
