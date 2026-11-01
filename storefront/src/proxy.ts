@@ -28,6 +28,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skips Next.js internals and files such as /favicon.ico.
-  matcher: ["/((?!_next/|.*\\.\\w+$).*)"],
+  // Skips Next.js internals, Route Handlers under /api (Shopify doesn't follow redirects) and files
+  // such as /favicon.ico.
+  matcher: ["/((?!_next/|api/|.*\\.\\w+$).*)"],
 };

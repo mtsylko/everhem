@@ -19,7 +19,10 @@ async function language() {
   return languageCode(await getLocale());
 }
 
-/** One tag for the whole catalog: it is small, and one webhook can refresh all of it. */
+/**
+ * One tag for the whole catalog: it is small, and Shopify's webhooks (`app/api/revalidate`) expire
+ * all of it at once. `cacheLife("hours")` stays as the fallback for a webhook that never arrives.
+ */
 export const CATALOG_TAG = "catalog";
 
 /** The seed's collection of every product: the place to filter the whole range. */

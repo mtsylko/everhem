@@ -30,11 +30,14 @@ before using an API you are not sure of. This code relies on:
   unknown paths to the 404 inside our own layout. The home page and collections have an
   `opengraph-image.tsx`, drawn by `components/share/share-image.tsx`.
 - `src/app/sitemap.ts` and `src/app/robots.ts` sit outside `[locale]`, as they cover every
-  language.
-- `src/proxy.ts` redirects a URL without a language to the shopper's (cookie, then Accept-Language).
+  language. So does `src/app/api/revalidate/route.ts`, which takes Shopify's webhooks (the seed
+  subscribes them), checks their signature and expires `CATALOG_TAG`.
+- `src/proxy.ts` redirects a URL without a language to the shopper's (cookie, then
+  Accept-Language). Its matcher skips `/api/`: Shopify doesn't follow redirects.
 - `src/lib/shopify/`: `client.ts` (`storefront()`, the only way to call the API), `catalog.ts`
   (cached catalog reads), `cart.ts` (cart query and mutations), `fragments.ts`, `api-version.ts`
-  (kept in step with the seed) and `image-loader.ts` (Shopify's CDN resizes images).
+  (kept in step with the seed), `image-loader.ts` (Shopify's CDN resizes images) and `webhook.ts`
+  (the HMAC check, tested in `test/`).
 - `src/lib/cart/`: `actions.ts` (Server Actions) and `get-cart.ts` (the request-time cart read).
 - `src/lib/product/`, `src/lib/money.ts` and `src/lib/theme.ts`: pure logic for variants,
   featured tiles, colours, filter and search URLs (`browse.ts`), prices, and the `@theme` colours
