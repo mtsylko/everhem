@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { startTransition, useOptimistic, useState, type FormEvent } from "react";
+import { Select } from "@/components/select";
 import { useI18n } from "@/i18n/i18n-context";
 import {
   isChosen,
@@ -145,46 +146,14 @@ export function BrowseForm({ path, browse, lists, price, currency }: BrowseFormP
         </fieldset>
       )}
 
-      <label className="min-w-0 md:ml-auto">
-        <span className="mb-3 block">{words.sortBy}</span>
-        <span className="relative grid">
-          <select
-            name="sort_by"
-            value={shown.sortBy}
-            onChange={(event) => send(event.currentTarget.form)}
-            className="flat-select peer col-start-1 row-start-1 h-12 w-full rounded-none bg-surface pr-11 pl-4 transition-colors hover:bg-stone"
-          >
-            {sorts.map((sort) => (
-              <option key={sort} value={sort}>
-                {words.sorts[sort]}
-              </option>
-            ))}
-          </select>
-          {/*
-            A select with a list of our own is only as wide as its chosen label. Hidden copies of every
-            label keep it as wide as the longest, as a native one is, so it doesn't jump between sorts.
-          */}
-          {sorts.map((sort) => (
-            <span
-              key={sort}
-              aria-hidden="true"
-              className="invisible col-start-1 row-start-1 h-0 overflow-hidden pr-11 pl-4"
-            >
-              {words.sorts[sort]}
-            </span>
-          ))}
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 16 16"
-            className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 transition-transform peer-open:rotate-180 motion-reduce:transition-none"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="m3 6 5 5 5-5" />
-          </svg>
-        </span>
-      </label>
+      <Select
+        label={words.sortBy}
+        name="sort_by"
+        value={shown.sortBy}
+        options={sorts.map((sort) => ({ value: sort, label: words.sorts[sort] }))}
+        onChange={(event) => send(event.currentTarget.form)}
+        className="min-w-0 md:ml-auto"
+      />
     </form>
   );
 }
