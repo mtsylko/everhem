@@ -33,6 +33,7 @@ interface BrowseFormProps {
 export function BrowseForm({ path, browse, lists, price, currency }: BrowseFormProps) {
   const router = useRouter();
   const words = useI18n().dictionary.browse;
+  const sorts = Object.keys(SORTS[browse.scope]) as SortBy[];
   // A choice shows the moment it's made; the URL catches up when the navigation lands.
   const [shown, setShown] = useOptimistic(browse);
   const [pending, setPending] = useOptimistic(false);
@@ -146,23 +147,36 @@ export function BrowseForm({ path, browse, lists, price, currency }: BrowseFormP
 
       <label className="min-w-0 md:ml-auto">
         <span className="mb-3 block">{words.sortBy}</span>
-        <span className="relative block">
+        <span className="relative grid">
           <select
             name="sort_by"
             value={shown.sortBy}
             onChange={(event) => send(event.currentTarget.form)}
-            className="h-12 w-full appearance-none rounded-none bg-surface pr-11 pl-4 transition-colors hover:bg-stone"
+            className="flat-select peer col-start-1 row-start-1 h-12 w-full rounded-none bg-surface pr-11 pl-4 transition-colors hover:bg-stone"
           >
-            {(Object.keys(SORTS[browse.scope]) as SortBy[]).map((sort) => (
+            {sorts.map((sort) => (
               <option key={sort} value={sort}>
                 {words.sorts[sort]}
               </option>
             ))}
           </select>
+          {/*
+            A select with a list of our own is only as wide as its chosen label. Hidden copies of every
+            label keep it as wide as the longest, as a native one is, so it doesn't jump between sorts.
+          */}
+          {sorts.map((sort) => (
+            <span
+              key={sort}
+              aria-hidden="true"
+              className="invisible col-start-1 row-start-1 h-0 overflow-hidden pr-11 pl-4"
+            >
+              {words.sorts[sort]}
+            </span>
+          ))}
           <svg
             aria-hidden="true"
             viewBox="0 0 16 16"
-            className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2"
+            className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 transition-transform peer-open:rotate-180 motion-reduce:transition-none"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
