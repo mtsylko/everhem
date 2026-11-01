@@ -16,7 +16,12 @@ import { localePath } from "@/i18n/locales";
 import { alternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { orderGallery, resolveSelection } from "@/lib/product/variants";
-import { getCollection, getProduct, getProductHandles } from "@/lib/shopify/catalog";
+import {
+  getCollection,
+  getCollectionProducts,
+  getProduct,
+  getProductHandles,
+} from "@/lib/shopify/catalog";
 
 const RELATED_COUNT = 4;
 
@@ -151,11 +156,12 @@ async function Related({
   collectionHandle: string;
   exclude: string;
 }) {
-  const [collection, dictionary] = await Promise.all([
+  const [collection, listing, dictionary] = await Promise.all([
     getCollection(collectionHandle),
+    getCollectionProducts(collectionHandle),
     getDictionary(),
   ]);
-  const products = collection?.products.nodes
+  const products = listing?.nodes
     .filter((product) => product.handle !== exclude)
     .slice(0, RELATED_COUNT);
   if (!collection || !products?.length) return null;

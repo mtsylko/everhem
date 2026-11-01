@@ -1,3 +1,5 @@
+import type { CollectionSourceInclusionConditionInput } from "../../generated/admin.types.js";
+
 export const SIZES = ["XS", "S", "M", "L", "XL"] as const;
 export type Size = (typeof SIZES)[number];
 
@@ -33,6 +35,12 @@ export interface CollectionText {
 
 export interface CatalogCollection extends CollectionText {
   handle: string;
+  /**
+   * Lets Shopify pick the products: every product that matches all the conditions joins, so no
+   * product names this collection. They are set when the seed creates the collection; the seed
+   * leaves an existing collection's conditions alone.
+   */
+  conditions?: readonly CollectionSourceInclusionConditionInput[];
   translations: Translated<CollectionText>;
 }
 

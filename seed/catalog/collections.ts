@@ -39,4 +39,18 @@ export const collections: readonly CatalogCollection[] = [
       },
     },
   },
+  {
+    // Every product, so the storefront can filter and sort the whole range in one place.
+    handle: "all",
+    title: "All basics",
+    descriptionHtml: "<p>Every tee, hoodie and knit in the range, in one place.</p>",
+    conditions: [{ productStatus: { matchType: "ANY", relation: "EQUALS", values: ["ACTIVE"] } }],
+    translations: {
+      pl: {
+        title: "Wszystkie modele",
+        descriptionHtml:
+          "<p>Wszystkie T-shirty, bluzy i swetry z naszej kolekcji w jednym miejscu.</p>",
+      },
+    },
+  },
 ];

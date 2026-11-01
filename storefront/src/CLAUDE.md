@@ -31,12 +31,12 @@ before using an API you are not sure of. This code relies on:
   (cached catalog reads), `cart.ts` (cart query and mutations), `fragments.ts`, `api-version.ts`
   (kept in step with the seed) and `image-loader.ts` (Shopify's CDN resizes images).
 - `src/lib/cart/`: `actions.ts` (Server Actions) and `get-cart.ts` (the request-time cart read).
-- `src/lib/product/` and `src/lib/money.ts`: pure logic for variants, featured tiles, colours and
-  prices. No React and no Next.js in there, so `test/` can cover it.
+- `src/lib/product/` and `src/lib/money.ts`: pure logic for variants, featured tiles, colours,
+  filter URLs (`browse.ts`) and prices. No React and no Next.js in there, so `test/` can cover it.
 - `src/i18n/`: locales, dictionaries, message formatting, `server.ts` for Server Components,
   `i18n-context.tsx` for Client Components, `metadata.ts` for hreflang.
-- `src/components/`: grouped by area (`cart/`, `home/`, `product/`), with shared pieces at the top
-  (`catalogue`, `product-tile`, `price`, `fields`).
+- `src/components/`: grouped by area (`cart/`, `collection/`, `home/`, `product/`), with shared
+  pieces at the top (`catalogue`, `product-tile`, `price`, `fields`).
 - `generated/`: GraphQL types from codegen. Never edit by hand.
 - `@/*` resolves to `src/*`. Generated types sit outside `src`, so they are imported relatively.
 
@@ -59,9 +59,9 @@ Use the Shopify AI Toolkit (`shopify-dev-mcp`) to look up and validate Storefron
 - **Catalog reads are cached functions** in `catalog.ts`: `"use cache"`, `cacheLife("hours")`,
   `cacheTag(CATALOG_TAG)`, with `getLocale()` read inside so the language is part of the cache key.
   A new read follows the same pattern, so pages keep prerendering.
-- **Request-time data renders inside Suspense.** Cookies, headers and the cart are read per
-  request; `getCart` awaits `connection()` first, so link prefetches skip it. Request-time calls
-  pass `buyerIp`.
+- **Request-time data renders inside Suspense.** Cookies, headers, the cart and a collection's
+  filtered products (`searchParams`) are read per request; `getCart` awaits `connection()` first,
+  so link prefetches skip it. Request-time calls pass `buyerIp`.
 - **Cart mutations report errors with HTTP 200.** Pass each payload through `unwrap` to turn
   `userErrors` and `warnings` into a notice.
 - **Server Actions are public endpoints.** Take every argument as `unknown` and check it (GID
@@ -154,8 +154,11 @@ plainly. The tokens live in `@theme` in `src/app/globals.css`; there is no `tail
   phones.
 - Sold-out products go last and never take a double tile; a sold-out size stays visible but
   crossed out.
-- Don't break URLs: `/[locale]/products/[handle]`, `/[locale]/collections/[handle]`, and the
-  `?color=&size=` query.
+- Don't break URLs: `/[locale]/products/[handle]`, `/[locale]/collections/[handle]` (`all` holds
+  every product), the `?color=&size=` query, and the collection's Liquid-style
+  `?filter.…=&sort_by=` query.
+- Filters come from Shopify (`products.filters`), not from code: the form renders whatever the
+  store's Search & Discovery settings offer.
 
 ## Quality checks
 

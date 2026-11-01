@@ -2,6 +2,7 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { getLocale } from "@/i18n/server";
 import { languageCode } from "@/i18n/locales";
+import { DEFAULT_BROWSE, queryFor, type Browse } from "@/lib/product/browse";
 import { storefront } from "./client";
 import { IMAGE_FRAGMENT, MONEY_FRAGMENT, PRODUCT_CARD_FRAGMENT } from "./fragments";
 
@@ -16,11 +17,15 @@ async function language() {
 /** One tag for the whole catalog: it is small, and one webhook can refresh all of it. */
 export const CATALOG_TAG = "catalog";
 
-/** Shopify creates "frontpage" for the Online Store theme's home page; it isn't one of our ranges. */
+/** The seed's collection of every product: the place to filter the whole range. */
+export const ALL_COLLECTION = "all";
+
+/** Shopify creates "frontpage" for the Online Store theme's home page; it isn't one of our pages. */
 const HIDDEN_COLLECTIONS = new Set(["frontpage"]);
 
-function isListed(collection: { handle: string }): boolean {
-  return !HIDDEN_COLLECTIONS.has(collection.handle);
+/** A range is a kind of garment, like tees: what the menus list and a product belongs to. */
+function isRange(collection: { handle: string }): boolean {
+  return !HIDDEN_COLLECTIONS.has(collection.handle) && collection.handle !== ALL_COLLECTION;
 }
 
 const COLLECTIONS_QUERY = `#graphql
@@ -75,7 +80,40 @@ const COLLECTION_QUERY = `#graphql
         title
         description
       }
-      products(first: 100, sortKey: COLLECTION_DEFAULT) {
+    }
+  }
+`;
+
+const COLLECTION_PRODUCTS_QUERY = `#graphql
+  query CollectionProducts(
+    $handle: String!
+    $filters: [ProductFilter!]
+    $sortKey: ProductCollectionSortKeys
+    $reverse: Boolean
+    $language: LanguageCode
+  ) @inContext(language: $language) {
+    localization {
+      country {
+        currency {
+          symbol
+        }
+      }
+    }
+    collection(handle: $handle) {
+      products(first: 100, filters: $filters, sortKey: $sortKey, reverse: $reverse) {
+        filters {
+          id
+          label
+          type
+          values {
+            label
+            count
+            input
+            swatch {
+              color
+            }
+          }
+        }
         nodes {
           ...ProductCard
         }
@@ -202,7 +240,7 @@ export async function getCollections() {
   cacheLife("hours");
   cacheTag(CATALOG_TAG);
   const { collections } = await storefront(COLLECTIONS_QUERY, { language: await language() });
-  return collections.nodes.filter(isListed);
+  return collections.nodes.filter(isRange);
 }
 
 export async function getProducts(sortKey: "BEST_SELLING" | "CREATED_AT" = "BEST_SELLING") {
@@ -222,7 +260,24 @@ export async function getCollection(handle: string) {
   cacheLife("hours");
   cacheTag(CATALOG_TAG);
   const { collection } = await storefront(COLLECTION_QUERY, { handle, language: await language() });
-  return collection && isListed(collection) ? collection : null;
+  return collection && !HIDDEN_COLLECTIONS.has(collection.handle) ? collection : null;
+}
+
+/**
+ * A collection's products, narrowed and sorted as the shopper chose, with the filters the store
+ * offers for them. Each choice is a cache entry of its own, shared by everyone who makes it.
+ */
+export async function getCollectionProducts(handle: string, browse: Browse = DEFAULT_BROWSE) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(CATALOG_TAG);
+  const { collection, localization } = await storefront(COLLECTION_PRODUCTS_QUERY, {
+    handle,
+    ...queryFor(browse),
+    language: await language(),
+  });
+  if (!collection) return null;
+  return { ...collection.products, currency: localization.country.currency.symbol };
 }
 
 export async function getProduct(handle: string) {
@@ -231,7 +286,7 @@ export async function getProduct(handle: string) {
   cacheTag(CATALOG_TAG);
   const { product } = await storefront(PRODUCT_QUERY, { handle, language: await language() });
   if (!product) return null;
-  return { ...product, collections: { nodes: product.collections.nodes.filter(isListed) } };
+  return { ...product, collections: { nodes: product.collections.nodes.filter(isRange) } };
 }
 
 export async function getColourIndex() {

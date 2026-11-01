@@ -51,6 +51,11 @@ describe("validateCatalog", () => {
     );
   });
 
+  it("keeps products from naming a collection that picks its own", () => {
+    const errors = validateCatalog([{ ...base, collection: "all" }], collections, colors);
+    expect(errors).toContain(`${base.handle}: collection "all" picks its products by conditions`);
+  });
+
   it("checks prices", () => {
     const errors = validateCatalog(
       [{ ...base, price: "79", compareAtPrice: "59.00" }],

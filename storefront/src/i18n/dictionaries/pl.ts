@@ -12,6 +12,7 @@ export const pl: Dictionary = {
     skipToContent: "Przejdź do treści",
     collections: "Kolekcje",
     language: "Język",
+    allBasics: "Wszystkie modele",
   },
   shopTheBasics: "Zobacz kolekcję",
   loading: "Ładowanie…",
@@ -67,6 +68,27 @@ export const pl: Dictionary = {
     care: "Pielęgnacja",
     more: "Zobacz też inne {collectionLower}",
   },
+  browse: {
+    label: "Filtry i\u00a0sortowanie",
+    sortBy: "Sortuj",
+    sorts: {
+      manual: "Polecane",
+      "created-descending": "Najnowsze",
+      "price-ascending": "Cena: od najniższej",
+      "price-descending": "Cena: od najwyższej",
+    },
+    from: "Od",
+    to: "Do",
+    apply: "Zastosuj",
+    clear: "Wyczyść filtry",
+    results: plural({
+      one: "Jeden model",
+      few: "{count} modele",
+      many: "{count} modeli",
+      other: "Modele: {count}",
+    }),
+    empty: "Żaden model z\u00a0kolekcji nie pasuje do tych filtrów.",
+  },
   cart: {
     bag: "Koszyk",
     items: plural({ one: "produkt", few: "produkty", many: "produktów", other: "produktu" }),
@@ -88,7 +110,6 @@ export const pl: Dictionary = {
     about: "Everhem to sklep demonstracyjny: headless frontend w\u00a0Next.js na Shopify.",
     fictional:
       "Marka jest fikcyjna. Zamówienia trafiają do deweloperskiego sklepu Shopify i\u00a0nigdy nie są wysyłane.",
-    allBasics: "Wszystkie modele",
     builtWith: "Zbudowane w\u00a0Next.js 16, React 19 i\u00a0Shopify Storefront API.",
     source: "Kod na GitHubie",
   },

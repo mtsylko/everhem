@@ -1,3 +1,4 @@
+import type { SortBy } from "@/lib/product/browse";
 import { plural } from "../format";
 
 /** The storefront's own words. Catalogue text (products, collections, colours) comes from Shopify. */
@@ -11,6 +12,7 @@ export const en = {
     skipToContent: "Skip to content",
     collections: "Collections",
     language: "Language",
+    allBasics: "All basics",
   },
   shopTheBasics: "Shop the basics",
   loading: "Loading…",
@@ -59,6 +61,23 @@ export const en = {
     care: "Care",
     more: "More {collectionLower}",
   },
+  browse: {
+    label: "Filter and sort",
+    sortBy: "Sort by",
+    /** Labels for the sort_by values in src/lib/product/browse.ts. */
+    sorts: {
+      manual: "Recommended",
+      "created-descending": "Newest",
+      "price-ascending": "Price, low to high",
+      "price-descending": "Price, high to low",
+    } satisfies Record<SortBy, string>,
+    from: "From",
+    to: "To",
+    apply: "Apply",
+    clear: "Clear filters",
+    results: plural({ one: "One basic", other: "{count} basics" }),
+    empty: "Nothing in the range matches these filters.",
+  },
   cart: {
     bag: "Bag",
     items: plural({ one: "item", other: "items" }),
@@ -79,7 +98,6 @@ export const en = {
     label: "Footer",
     about: "Everhem is a demo store: a headless Next.js storefront on Shopify.",
     fictional: "A fictional brand. Orders go to a Shopify development store and are never shipped.",
-    allBasics: "All basics",
     builtWith: "Built with Next.js 16, React 19 and the Shopify Storefront API.",
     source: "Source on GitHub",
   },
