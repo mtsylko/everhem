@@ -1,8 +1,8 @@
 {
-  "name": "@everhem/storefront",
+  "name": "@plainweft/storefront",
   "private": true,
   "type": "module",
-  "description": "Headless Next.js storefront for Everhem on the Shopify Storefront API",
+  "description": "Headless Next.js storefront for Plainweft on the Shopify Storefront API",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

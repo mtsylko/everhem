@@ -1,6 +1,6 @@
 interface FeaturedSource {
   availableForSale: boolean;
-  /** Why the product is featured, from its everhem.featured metafield. */
+  /** Why the product is featured, from its plainweft.featured metafield. */
   featured?: { value: string } | null;
 }
 

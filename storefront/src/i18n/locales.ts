@@ -8,7 +8,7 @@ export const DEFAULT_LOCALE: Locale = "en";
 export const LOCALE_NAMES: Record<Locale, string> = { en: "English", pl: "Polski" };
 
 /** Remembers a language the shopper picked, so the bare domain opens in it next time. */
-export const LOCALE_COOKIE = "everhem_locale";
+export const LOCALE_COOKIE = "plainweft_locale";
 
 export function hasLocale(value: string | null | undefined): value is Locale {
   return (LOCALES as readonly (string | null | undefined)[]).includes(value);

@@ -5,37 +5,37 @@ import type {
 import { FEATURE_REASONS } from "./catalog/types.ts";
 
 /** Every product the seeder creates gets this tag. Teardown searches by it. */
-export const SEED_TAG = "everhem-seed";
+export const SEED_TAG = "plainweft-seed";
 
-export const VENDOR = "Everhem";
+export const VENDOR = "Plainweft";
 
 /**
  * Holds a hash of the seed data for a product or collection.
  * Its presence also marks the resource as created by the seeder.
  */
 export const CHECKSUM_METAFIELD = {
-  namespace: "everhem_seed",
+  namespace: "plainweft_seed",
   key: "checksum",
   type: "single_line_text_field",
 } as const;
 
 export const PRODUCT_METAFIELDS = {
   fabric: {
-    namespace: "everhem",
+    namespace: "plainweft",
     key: "fabric",
     type: "single_line_text_field",
     name: "Fabric composition",
     description: "Fibre content and fabric weight, e.g. 100% organic cotton, 180 g/m² jersey.",
   },
   care: {
-    namespace: "everhem",
+    namespace: "plainweft",
     key: "care",
     type: "list.single_line_text_field",
     name: "Care instructions",
     description: "Washing and care steps, one per line.",
   },
   featured: {
-    namespace: "everhem",
+    namespace: "plainweft",
     key: "featured",
     type: "single_line_text_field",
     name: "Featured as",

@@ -1,6 +1,6 @@
-# Everhem
+# Plainweft
 
-A demo Shopify store for **Everhem**, a fictional brand of minimal everyday basics.
+A demo Shopify store for **Plainweft**, a fictional brand of minimal everyday basics.
 
 This repository holds two parts:
 
@@ -17,7 +17,7 @@ This repository holds two parts:
 - 36 products, each in 2–3 of 23 colors. Clothes come in sizes XS–XL and accessories in one
   size, which makes 398 variants
 - Prices in PLN, some with compare-at prices for a sale
-- SKUs such as `HEM-ECT-BLK-M`, and stock at the store's main location
+- SKUs such as `PLW-ECT-BLK-M`, and stock at the store's main location
 - 4 sold-out products, plus some sold-out sizes in other products
 - 3 images per product, with the right image linked to each color
 - Product metafields for fabric composition, care instructions and the reason a product is
@@ -60,7 +60,7 @@ npm run teardown -- --yes       # delete everything the seed created
 A run logs one event per resource and ends with a summary. For example:
 
 ```
-01:38:47 INFO  preflight.ok shop=everhem-agiecxdg.myshopify.com currency=PLN location="Shop location" publications=["Online Store","Shop","Point of Sale"]
+01:38:47 INFO  preflight.ok shop=plainweft-demo.myshopify.com currency=PLN location="Shop location" publications=["Online Store","Shop","Point of Sale"]
 01:38:48 INFO  collection.created handle=tees id=gid://shopify/Collection/720261906777
 01:38:48 INFO  collection.published handle=tees publications=["Online Store","Shop","Point of Sale"]
 01:38:52 INFO  product.created handle=essential-crew-tee id=gid://shopify/Product/16752147333465 images=3
@@ -83,14 +83,14 @@ Logs are readable lines in a terminal and JSON lines elsewhere. Set `LOG_FORMAT=
 ### Running it twice creates no duplicates
 
 - **Products are upserted by handle** with `productSet`.
-- **Each product and collection stores a hash of its seed data** in an `everhem_seed.checksum`
+- **Each product and collection stores a hash of its seed data** in an `plainweft_seed.checksum`
   metafield. On the next run an unchanged resource is skipped, a changed one is updated in place,
   and a missing one is created. Image file contents are part of the hash, so replacing an image
   file updates its product.
 - **Existing variants keep their IDs.** The seed matches them by color and size.
 - **Old images don't pile up.** A changed product gets its images uploaded again, and
   `productSet` deletes the old files it no longer lists.
-- **Teardown only deletes what the seed created.** A resource needs both the `everhem-seed` tag
+- **Teardown only deletes what the seed created.** A resource needs both the `plainweft-seed` tag
   and the checksum metafield to count. If the store already has a product or collection with a
   catalog handle, the seed stops instead of overwriting it. Translations go with their products;
   the Polish language stays on, since it is a store setting. Webhook subscriptions count as the
@@ -221,7 +221,7 @@ npm run start -w storefront     # serve the production build
   answers. `getCart` waits for `connection()`, so only a real visit reads the cart.
 - **The chosen variant is in the URL** (`?color=black&size=m`), so a link opens on that color and
   size. Picking one updates the URL with `history.replaceState`, with no server round trip.
-- **Merchandising comes from the admin.** A product with an `everhem.featured` value takes one of
+- **Merchandising comes from the admin.** A product with an `plainweft.featured` value takes one of
   the grid's double tiles, labelled with that reason. Featured products fill every seventh place,
   and a sold-out one stays single.
 - **"You may also like" is Shopify's.** A product page shows Shopify's related products
@@ -264,7 +264,7 @@ checkout. The password is in the admin under **Online Store → Preferences**.
 
 ```
 seed/
-├── catalog/            # the Everhem catalog, in English and Polish: colors, collections, products, images
+├── catalog/            # the Plainweft catalog, in English and Polish: colors, collections, products, images
 ├── scripts/            # placeholder image renderer (garments, fabric textures, PNG encoder, rasterizer)
 ├── src/
 │   ├── catalog/        # pure functions: variants, stock, images, checksums, productSet input, translations

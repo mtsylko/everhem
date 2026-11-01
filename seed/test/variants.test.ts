@@ -16,11 +16,11 @@ describe("planVariants", () => {
     const variants = planVariants(product, colors);
     expect(variants).toHaveLength(10);
     expect(variants.map((v) => v.sku).slice(0, 5)).toEqual([
-      "HEM-TST-BLK-XS",
-      "HEM-TST-BLK-S",
-      "HEM-TST-BLK-M",
-      "HEM-TST-BLK-L",
-      "HEM-TST-BLK-XL",
+      "PLW-TST-BLK-XS",
+      "PLW-TST-BLK-S",
+      "PLW-TST-BLK-M",
+      "PLW-TST-BLK-L",
+      "PLW-TST-BLK-XL",
     ]);
   });
 
@@ -32,7 +32,7 @@ describe("planVariants", () => {
   it("gives a one-size accessory one variant per color, with OS in the SKU", () => {
     const beanie = { ...product, sizes: ["One size"] } as CatalogProduct;
     const variants = planVariants(beanie, colors);
-    expect(variants.map((v) => v.sku)).toEqual(["HEM-TST-BLK-OS", "HEM-TST-WHT-OS"]);
+    expect(variants.map((v) => v.sku)).toEqual(["PLW-TST-BLK-OS", "PLW-TST-WHT-OS"]);
     expect(variants[0]?.quantity).toBeGreaterThan(0);
   });
 
@@ -45,7 +45,7 @@ describe("planVariants", () => {
 
 describe("skuFor", () => {
   it("joins brand, product, color and size codes", () => {
-    expect(skuFor("ECT", "HGR", "XL")).toBe("HEM-ECT-HGR-XL");
+    expect(skuFor("ECT", "HGR", "XL")).toBe("PLW-ECT-HGR-XL");
   });
 });
 

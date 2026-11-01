@@ -220,10 +220,10 @@ const PRODUCT_QUERY = `#graphql
           }
         }
       }
-      fabric: metafield(namespace: "everhem", key: "fabric") {
+      fabric: metafield(namespace: "plainweft", key: "fabric") {
         value
       }
-      care: metafield(namespace: "everhem", key: "care") {
+      care: metafield(namespace: "plainweft", key: "care") {
         value
       }
       collections(first: 5) {
@@ -304,7 +304,7 @@ const COLLECTION_PREVIEW_QUERY = `#graphql
       products(first: 100) {
         nodes {
           availableForSale
-          featured: metafield(namespace: "everhem", key: "featured") {
+          featured: metafield(namespace: "plainweft", key: "featured") {
             value
           }
           featuredImage {

@@ -32,7 +32,7 @@ export function alternates(locale: Locale, path = ""): Metadata["alternates"] {
  */
 export function openGraph(locale: Locale) {
   return {
-    siteName: "Everhem",
+    siteName: "Plainweft",
     type: "website",
     locale: OPEN_GRAPH_LOCALES[locale],
     alternateLocale: LOCALES.filter((other) => other !== locale).map(

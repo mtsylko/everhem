@@ -45,11 +45,11 @@ describe("createShopifyClient", () => {
   it("returns data and remembers the bucket state", async () => {
     const { client, sleeps } = setup();
     request.mockResolvedValue({
-      data: { shop: { name: "Everhem" } },
+      data: { shop: { name: "Plainweft" } },
       extensions: { cost: { requestedQueryCost: 2, throttleStatus } },
     });
 
-    await expect(client.request(SHOP)).resolves.toEqual({ shop: { name: "Everhem" } });
+    await expect(client.request(SHOP)).resolves.toEqual({ shop: { name: "Plainweft" } });
     expect(sleeps).toEqual([]);
   });
 
@@ -60,9 +60,9 @@ describe("createShopifyClient", () => {
         errors: { graphQLErrors: [{ message: "Throttled", extensions: { code: "THROTTLED" } }] },
         extensions: { cost: { requestedQueryCost: 110, throttleStatus } },
       })
-      .mockResolvedValueOnce({ data: { shop: { name: "Everhem" } } });
+      .mockResolvedValueOnce({ data: { shop: { name: "Plainweft" } } });
 
-    await expect(client.request(SHOP)).resolves.toEqual({ shop: { name: "Everhem" } });
+    await expect(client.request(SHOP)).resolves.toEqual({ shop: { name: "Plainweft" } });
     // 10 points available, 110 needed, 50 per second → 2 seconds.
     expect(sleeps).toEqual([2000]);
     expect(request).toHaveBeenCalledTimes(2);

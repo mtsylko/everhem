@@ -12,7 +12,7 @@ const USAGE = `Usage:
   npm run seed [-- --dry-run] [--concurrency 3]
   npm run teardown [-- --yes]
 
-seed       Creates or updates the Everhem catalog. Safe to run again.
+seed       Creates or updates the Plainweft catalog. Safe to run again.
 teardown   Deletes everything seed created. Without --yes it only lists what it would delete.`;
 
 const logger = createLogger(loggerOptionsFromEnv(process.env, Boolean(process.stdout.isTTY)));

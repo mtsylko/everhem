@@ -4,7 +4,7 @@ import { plural } from "../format";
 /** The storefront's own words. Catalogue text (products, collections, colours) comes from Shopify. */
 export const en = {
   meta: {
-    title: "Everhem: everyday basics in natural fibres",
+    title: "Plainweft: everyday basics in natural fibres",
     description:
       "Tees, hoodies, knitwear and accessories in organic cotton, linen, merino and cashmere. A demo store built on the Shopify Storefront API.",
   },
@@ -43,7 +43,7 @@ export const en = {
   },
   product: {
     soldOut: "Sold out",
-    /** Labels for the everhem.featured metafield's choices. */
+    /** Labels for the plainweft.featured metafield's choices. */
     featured: { New: "New", Bestseller: "Bestseller", "Staff pick": "Staff pick" } as Record<
       string,
       string
@@ -114,7 +114,7 @@ export const en = {
   },
   footer: {
     label: "Footer",
-    about: "Everhem is a demo store: a headless Next.js storefront on Shopify.",
+    about: "Plainweft is a demo store: a headless Next.js storefront on Shopify.",
     fictional: "A fictional brand. Orders go to a Shopify development store and are never shipped.",
     photoCredit: "Home page photo by {author} on Unsplash.",
     builtWith: "Built with Next.js 16, React 19 and the Shopify Storefront API.",

@@ -4,7 +4,7 @@ import type { Dictionary } from "./en";
 // Polish typesetting keeps one-letter words (a, i, o, u, w, z) with the next word: hence \u00a0.
 export const pl: Dictionary = {
   meta: {
-    title: "Everhem: ubrania na co dzień z naturalnych włókien",
+    title: "Plainweft: ubrania na co dzień z naturalnych włókien",
     description:
       "T-shirty, bluzy, swetry i\u00a0dodatki z\u00a0bawełny organicznej, lnu, wełny merino i\u00a0kaszmiru. Sklep demonstracyjny na Shopify Storefront API.",
   },
@@ -126,7 +126,7 @@ export const pl: Dictionary = {
   },
   footer: {
     label: "Stopka",
-    about: "Everhem to sklep demonstracyjny: headless frontend w\u00a0Next.js na Shopify.",
+    about: "Plainweft to sklep demonstracyjny: headless frontend w\u00a0Next.js na Shopify.",
     fictional:
       "Marka jest fikcyjna. Zamówienia trafiają do deweloperskiego sklepu Shopify i\u00a0nigdy nie są wysyłane.",
     photoCredit: "Zdjęcie na stronie głównej: {author}, Unsplash.",

@@ -15,7 +15,7 @@ export async function Header() {
   return (
     <header className="z-20 flex flex-wrap items-center justify-between gap-x-10 gap-y-3 bg-ground px-gutter py-4 md:sticky md:top-0">
       <Link href={localePath(locale)} className="text-lead font-semibold tracking-tight">
-        Everhem
+        Plainweft
       </Link>
       <nav
         aria-label={layout.collections}

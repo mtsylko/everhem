@@ -213,7 +213,7 @@ function jsonLd(product: Product): string {
     name: product.title,
     description: product.description,
     image: product.images.nodes.map((image) => image.url),
-    brand: { "@type": "Brand", name: "Everhem" },
+    brand: { "@type": "Brand", name: "Plainweft" },
     offers: product.variants.nodes.map((variant) => ({
       "@type": "Offer",
       sku: variant.sku,
