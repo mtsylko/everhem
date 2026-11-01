@@ -97,6 +97,13 @@
       .rise-late {
         animation-range: entry 15% entry 85%;
       }
+      /*
+        A percentage of entry grows with the element's height, so a double tile would still be rising
+        after the tiles beside it had settled. A fixed distance keeps a row rising as one.
+      */
+      .rise-even {
+        animation-range: entry 0% entry 20rem;
+      }
     }
   }
 
