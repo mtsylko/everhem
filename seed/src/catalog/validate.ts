@@ -1,6 +1,6 @@
 import { IMAGES_PER_PRODUCT, planImages } from "./images.ts";
 import type { CatalogCollection, CatalogProduct, Color } from "./types.ts";
-import { planVariants } from "./variants.ts";
+import { planVariants, sizesOf } from "./variants.ts";
 
 const PRICE = /^\d+\.\d{2}$/;
 
@@ -42,8 +42,9 @@ export function validateCatalog(
     }
 
     if (product.stock.kind === "in-stock") {
-      for (const { color } of product.stock.soldOut ?? []) {
+      for (const { color, size } of product.stock.soldOut ?? []) {
         if (!product.colors.includes(color)) at(`sold-out color "${color}" is not a product color`);
+        if (!sizesOf(product).includes(size)) at(`sold-out size "${size}" is not a product size`);
       }
     }
 

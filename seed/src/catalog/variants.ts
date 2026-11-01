@@ -1,5 +1,5 @@
 import { quantityFor } from "./inventory.ts";
-import { SIZES, type CatalogProduct, type Color, type Size } from "./types.ts";
+import { ONE_SIZE, SIZES, type CatalogProduct, type Color, type Size } from "./types.ts";
 
 export interface PlannedVariant {
   color: string;
@@ -9,7 +9,12 @@ export interface PlannedVariant {
 }
 
 export function skuFor(productCode: string, colorCode: string, size: Size): string {
-  return `HEM-${productCode}-${colorCode}-${size}`;
+  // A SKU has no spaces, so "One size" becomes OS.
+  return `HEM-${productCode}-${colorCode}-${size === ONE_SIZE ? "OS" : size}`;
+}
+
+export function sizesOf(product: Pick<CatalogProduct, "sizes">): readonly Size[] {
+  return product.sizes ?? SIZES;
 }
 
 export function variantKey(color: string, size: string): string {
@@ -24,7 +29,7 @@ export function planVariants(
     const color = palette.get(colorName);
     if (!color) throw new Error(`${product.handle}: unknown color "${colorName}"`);
 
-    return SIZES.map((size) => ({
+    return sizesOf(product).map((size) => ({
       color: colorName,
       size,
       sku: skuFor(product.code, color.code, size),

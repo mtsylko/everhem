@@ -1,7 +1,7 @@
-import type { Size, StockPlan } from "./types.ts";
+import { ONE_SIZE, type Size, type StockPlan } from "./types.ts";
 
-// Basics sell mostly in M and L.
-const SIZE_CURVE: Record<Size, number> = { XS: 4, S: 9, M: 14, L: 12, XL: 6 };
+// Basics sell mostly in M and L. A one-size accessory gets the whole run in one variant.
+const SIZE_CURVE: Record<Size, number> = { XS: 4, S: 9, M: 14, L: 12, XL: 6, [ONE_SIZE]: 30 };
 
 // The first color of a product is its bestseller, so it gets more stock.
 const LEAD_COLOR_BONUS = 4;

@@ -11,13 +11,14 @@ This repository holds two parts:
 
 ## What the seed creates
 
-- 3 collections: Tees, Hoodies, Knitwear
+- 4 collections: Tees, Hoodies, Knitwear, Accessories
 - An automatic **All basics** collection (handle `all`): Shopify adds every active product to it,
   so the storefront can filter the whole range in one place
-- 12 products, each in 2–3 colors and sizes XS–XL, which makes 150 variants
+- 36 products, each in 2–3 of 23 colors. Clothes come in sizes XS–XL and accessories in one
+  size, which makes 398 variants
 - Prices in PLN, some with compare-at prices for a sale
 - SKUs such as `HEM-ECT-BLK-M`, and stock at the store's main location
-- 3 sold-out products, plus some sold-out sizes in other products
+- 4 sold-out products, plus some sold-out sizes in other products
 - 3 images per product, with the right image linked to each color
 - Product metafields for fabric composition, care instructions and the reason a product is
   featured (New, Bestseller or Staff pick), readable from the Storefront API
@@ -124,7 +125,7 @@ Products sync three at a time (`--concurrency`), and the limiter keeps them with
 ### productSet instead of bulk operations
 
 One `productSet` call creates a product with its options, variants, prices, inventory, images,
-metafields and collection membership. For 12 products that means 12 synchronous calls, and
+metafields and collection membership. For 36 products that means 36 synchronous calls, and
 each result can be checked and logged right away. A bulk operation needs a JSONL upload and
 polling until it finishes. That only pays off for catalogs of hundreds or thousands of products.
 
@@ -134,9 +135,12 @@ Product images come from local files in `seed/catalog/images/<handle>/`. They go
 `stagedUploadsCreate` and are then passed to `productSet`. A product can also list remote image
 URLs in its `images` field, which Shopify downloads itself.
 
-The current files are flat placeholders rendered from code (`npm run placeholders -w seed`), in
-the exact color of each variant. To use real photos, replace the files with the same names and run
-the seed again.
+The current files are placeholders drawn from code (`npm run placeholders -w seed`), in the exact
+color of each variant. Each product's `fit` and `texture` shape its drawing: a boxy tee is wider and
+shorter than a regular one, and linen, fleece and rib knit each have their own surface. Folds, form
+and the shadow are worked out once per view and then painted in every color, and the result is the
+same bytes on every run, so the seed only uploads images that changed. To use real photos, replace
+the files with the same names and run the seed again.
 
 ### Typed GraphQL
 
@@ -225,7 +229,7 @@ checkout. The password is in the admin under **Online Store → Preferences**.
 ```
 seed/
 ├── catalog/            # the Everhem catalog, in English and Polish: colors, collections, products, images
-├── scripts/            # placeholder image renderer (PNG encoder and rasterizer)
+├── scripts/            # placeholder image renderer (garments, fabric textures, PNG encoder, rasterizer)
 ├── src/
 │   ├── catalog/        # pure functions: variants, stock, images, checksums, productSet input, translations
 │   ├── shopify/        # auth, typed client, cost limiter, error helpers

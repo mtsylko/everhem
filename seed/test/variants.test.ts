@@ -29,6 +29,13 @@ describe("planVariants", () => {
     expect(whiteM?.quantity).toBe(0);
   });
 
+  it("gives a one-size accessory one variant per color, with OS in the SKU", () => {
+    const beanie = { ...product, sizes: ["One size"] } as CatalogProduct;
+    const variants = planVariants(beanie, colors);
+    expect(variants.map((v) => v.sku)).toEqual(["HEM-TST-BLK-OS", "HEM-TST-WHT-OS"]);
+    expect(variants[0]?.quantity).toBeGreaterThan(0);
+  });
+
   it("fails on a color missing from the palette", () => {
     expect(() => planVariants({ ...product, colors: ["Neon Pink"] }, colors)).toThrow(
       'test-tee: unknown color "Neon Pink"',

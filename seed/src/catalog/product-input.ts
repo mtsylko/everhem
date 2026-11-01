@@ -8,8 +8,8 @@ import {
 } from "../constants.ts";
 import { checksum } from "./checksum.ts";
 import { variantImageFor, type PlannedImage } from "./images.ts";
-import { SIZES, type CatalogProduct, type Color } from "./types.ts";
-import { planVariants, variantKey } from "./variants.ts";
+import type { CatalogProduct, Color } from "./types.ts";
+import { planVariants, sizesOf, variantKey } from "./variants.ts";
 
 export interface ResolvedImage extends PlannedImage {
   /** A public URL or a staged upload URL that Shopify can fetch. */
@@ -74,7 +74,7 @@ export function buildProductSetInput(
     collections: [ctx.collectionId],
     productOptions: [
       { name: "Color", position: 1, values: product.colors.map((name) => ({ name })) },
-      { name: "Size", position: 2, values: SIZES.map((name) => ({ name })) },
+      { name: "Size", position: 2, values: sizesOf(product).map((name) => ({ name })) },
     ],
     files: ctx.images.map(toFileInput),
     variants,

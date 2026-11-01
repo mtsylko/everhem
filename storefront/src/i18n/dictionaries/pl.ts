@@ -6,7 +6,7 @@ export const pl: Dictionary = {
   meta: {
     title: "Everhem: ubrania na co dzień z naturalnych włókien",
     description:
-      "T-shirty, bluzy i swetry z bawełny organicznej, lnu, wełny merino i kaszmiru. Sklep demonstracyjny na Shopify Storefront API.",
+      "T-shirty, bluzy, swetry i\u00a0dodatki z\u00a0bawełny organicznej, lnu, wełny merino i\u00a0kaszmiru. Sklep demonstracyjny na Shopify Storefront API.",
   },
   layout: {
     skipToContent: "Przejdź do treści",
@@ -27,7 +27,7 @@ export const pl: Dictionary = {
       other: "Wszystkie modele: {count}",
     }),
     catalogueLead:
-      "T-shirty, bluzy i\u00a0swetry w\u00a0rozmiarach od XS do XL. Każdy model pokazujemy w\u00a0pierwszym kolorze, pozostałe znajdziesz na jego stronie.",
+      "T-shirty, bluzy i\u00a0swetry w\u00a0rozmiarach od XS do XL, a\u00a0dodatki w\u00a0rozmiarze uniwersalnym. Każdy model pokazujemy w\u00a0pierwszym kolorze, pozostałe znajdziesz na jego stronie.",
     coloursTitle: "Według koloru",
     stylesInColour: plural({
       one: "{colour}: jeden model",

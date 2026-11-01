@@ -1,6 +1,18 @@
 import type { TranslationInput } from "../../generated/admin.types.js";
 import { planImages, translatedAlt } from "./images.ts";
-import type { CatalogCollection, CatalogProduct, Color, TranslatedLocale } from "./types.ts";
+import {
+  ONE_SIZE,
+  type CatalogCollection,
+  type CatalogProduct,
+  type Color,
+  type Translated,
+  type TranslatedLocale,
+} from "./types.ts";
+
+/** Size names that read differently in another language. XS to XL read the same everywhere. */
+const SIZE_NAMES: Translated<Readonly<Record<string, string>>> = {
+  pl: { [ONE_SIZE]: "Rozmiar uniwersalny" },
+};
 
 /** Translated values to have in the store, by resource id, then by translatable key. */
 export type WantedTranslations = ReadonlyMap<string, Readonly<Record<string, string>>>;
@@ -31,8 +43,9 @@ export interface TranslationPlan {
 }
 
 /**
- * Everything a shopper reads on a product: its title and description, colour names, fabric and
- * care, and image alt text. Option names stay in English: the storefront matches on "Color".
+ * Everything a shopper reads on a product: its title and description, colour and size names,
+ * fabric and care, and image alt text. Option names stay in English: the storefront matches on
+ * "Color".
  */
 export function wantedProductTranslations(
   product: CatalogProduct,
@@ -48,6 +61,11 @@ export function wantedProductTranslations(
   const colors = sources.options.find((option) => option.name === "Color");
   for (const value of colors?.optionValues ?? []) {
     const name = palette.get(value.name)?.translations[locale];
+    if (name) wanted.set(value.id, { name });
+  }
+  const sizes = sources.options.find((option) => option.name === "Size");
+  for (const value of sizes?.optionValues ?? []) {
+    const name = SIZE_NAMES[locale][value.name];
     if (name) wanted.set(value.id, { name });
   }
 
