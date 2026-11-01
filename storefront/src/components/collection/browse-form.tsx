@@ -8,13 +8,12 @@ import {
   readBrowse,
   searchFor,
   SORTS,
+  TERMS,
   type Browse,
   type ListFacet,
   type PriceFacet,
   type SortBy,
 } from "@/lib/product/browse";
-
-const SORT_ORDER = Object.keys(SORTS) as SortBy[];
 
 interface BrowseFormProps {
   /** The page being browsed, without its query: where the form sends the choice. */
@@ -51,7 +50,7 @@ export function BrowseForm({ path, browse, lists, price, currency }: BrowseFormP
     const fields = [...new FormData(form)].filter(
       (field): field is [string, string] => typeof field[1] === "string",
     );
-    const next = readBrowse(new URLSearchParams(fields));
+    const next = readBrowse(new URLSearchParams(fields), browse.scope);
     startTransition(() => {
       setShown(next);
       setPending(true);
@@ -74,6 +73,8 @@ export function BrowseForm({ path, browse, lists, price, currency }: BrowseFormP
       // the products start on the first screen.
       className="grid grid-cols-2 items-end gap-x-2 gap-y-6 md:flex md:flex-wrap md:gap-x-8"
     >
+      {/* A search keeps its terms when the filters change. */}
+      {shown.terms && <input type="hidden" name={TERMS} value={shown.terms} />}
       {lists.map((list) => (
         <fieldset key={list.id} className={`min-w-0 ${list.values.length > 2 ? "col-span-2" : ""}`}>
           <legend className="mb-3">{list.label}</legend>
@@ -152,7 +153,7 @@ export function BrowseForm({ path, browse, lists, price, currency }: BrowseFormP
             onChange={(event) => send(event.currentTarget.form)}
             className="h-12 w-full appearance-none rounded-none bg-surface pr-11 pl-4 transition-colors hover:bg-stone"
           >
-            {SORT_ORDER.map((sort) => (
+            {(Object.keys(SORTS[browse.scope]) as SortBy[]).map((sort) => (
               <option key={sort} value={sort}>
                 {words.sorts[sort]}
               </option>

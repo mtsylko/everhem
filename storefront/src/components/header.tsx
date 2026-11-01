@@ -37,6 +37,24 @@ export async function Header() {
         </ul>
       </nav>
       <div className="flex items-center gap-6">
+        <Link
+          href={localePath(locale, "/search")}
+          className="font-medium underline-offset-4 hover:underline"
+        >
+          {/* A phone's first row only fits the logo, the languages and the bag beside a glass. */}
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-5 md:hidden"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path d="m15.5 15.5 5 5" />
+          </svg>
+          <span className="sr-only md:not-sr-only">{layout.search}</span>
+        </Link>
         <LocaleSwitcher />
         <CartButton />
       </div>

@@ -13,6 +13,7 @@ export const en = {
     collections: "Collections",
     language: "Language",
     allBasics: "All basics",
+    search: "Search",
   },
   shopTheBasics: "Shop the basics",
   loading: "Loading…",
@@ -59,7 +60,7 @@ export const en = {
     chooseSize: "Choose a size first.",
     fabric: "Fabric",
     care: "Care",
-    more: "More {collectionLower}",
+    related: "You may also like",
   },
   browse: {
     label: "Filter and sort",
@@ -67,6 +68,7 @@ export const en = {
     /** Labels for the sort_by values in src/lib/product/browse.ts. */
     sorts: {
       manual: "Recommended",
+      relevance: "Relevance",
       "created-descending": "Newest",
       "price-ascending": "Price, low to high",
       "price-descending": "Price, high to low",
@@ -77,6 +79,20 @@ export const en = {
     clear: "Clear filters",
     results: plural({ one: "One basic", other: "{count} basics" }),
     empty: "Nothing in the range matches these filters.",
+  },
+  search: {
+    title: "Search",
+    lead: "Look for a garment, a colour or a fabric.",
+    label: "Search the range",
+    submit: "Search",
+    /** Searches to start from, which find something in this language. */
+    tryLabel: "Try",
+    suggestions: ["hoodie", "black", "merino"],
+    results: plural({
+      one: "One basic matches “{terms}”",
+      other: "{count} basics match “{terms}”",
+    }),
+    empty: "Nothing in the range matches “{terms}”.",
   },
   cart: {
     bag: "Bag",

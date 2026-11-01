@@ -11,16 +11,15 @@ import {
   type Product,
 } from "@/components/product/product-client";
 import { ProductTile } from "@/components/product-tile";
-import { format } from "@/i18n/format";
 import { localePath } from "@/i18n/locales";
 import { alternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
 import { orderGallery, resolveSelection } from "@/lib/product/variants";
 import {
-  getCollection,
   getCollectionProducts,
   getProduct,
   getProductHandles,
+  getRecommendations,
 } from "@/lib/shopify/catalog";
 
 const RELATED_COUNT = 4;
@@ -142,34 +141,42 @@ async function ProductDetails({ handle }: { handle: Promise<string> }) {
         </div>
       </article>
 
-      {collection && <Related collectionHandle={collection.handle} exclude={product.handle} />}
+      <Related handle={product.handle} collectionHandle={collection?.handle} />
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(product) }} />
     </>
   );
 }
 
+/**
+ * Shopify's related products. Shopify may have none yet for a new product, and then the rest of its
+ * collection stands in.
+ */
 async function Related({
+  handle,
   collectionHandle,
-  exclude,
 }: {
-  collectionHandle: string;
-  exclude: string;
+  handle: string;
+  collectionHandle: string | undefined;
 }) {
-  const [collection, listing, dictionary] = await Promise.all([
-    getCollection(collectionHandle),
-    getCollectionProducts(collectionHandle),
+  const [recommended, dictionary] = await Promise.all([
+    getRecommendations(handle),
     getDictionary(),
   ]);
-  const products = listing?.nodes
-    .filter((product) => product.handle !== exclude)
+  const candidates =
+    recommended.length > 0 || !collectionHandle
+      ? recommended
+      : ((await getCollectionProducts(collectionHandle))?.nodes ?? []);
+  // A suggestion that can't be bought is a dead end.
+  const products = candidates
+    .filter((product) => product.handle !== handle && product.availableForSale)
     .slice(0, RELATED_COUNT);
-  if (!collection || !products?.length) return null;
+  if (products.length === 0) return null;
 
   return (
     <section aria-labelledby="related-title" className="mt-section px-gutter">
       <h2 id="related-title" className="rise mb-8 text-head font-medium">
-        {format(dictionary.product.more, { collectionLower: collection.title.toLowerCase() })}
+        {dictionary.product.related}
       </h2>
       <ul className="grid grid-cols-2 gap-x-2 lg:grid-cols-4">
         {products.map((product, index) => (

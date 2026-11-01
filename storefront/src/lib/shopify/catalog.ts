@@ -2,9 +2,14 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { getLocale } from "@/i18n/server";
 import { languageCode } from "@/i18n/locales";
-import { DEFAULT_BROWSE, queryFor, type Browse } from "@/lib/product/browse";
+import { defaultBrowse, queryFor, type Browse } from "@/lib/product/browse";
 import { storefront } from "./client";
-import { IMAGE_FRAGMENT, MONEY_FRAGMENT, PRODUCT_CARD_FRAGMENT } from "./fragments";
+import {
+  FILTER_FRAGMENT,
+  IMAGE_FRAGMENT,
+  MONEY_FRAGMENT,
+  PRODUCT_CARD_FRAGMENT,
+} from "./fragments";
 
 /**
  * Catalog reads run in the page's language: Shopify answers with its translations, and falls back
@@ -102,17 +107,7 @@ const COLLECTION_PRODUCTS_QUERY = `#graphql
     collection(handle: $handle) {
       products(first: 100, filters: $filters, sortKey: $sortKey, reverse: $reverse) {
         filters {
-          id
-          label
-          type
-          values {
-            label
-            count
-            input
-            swatch {
-              color
-            }
-          }
+          ...Filter
         }
         nodes {
           ...ProductCard
@@ -120,6 +115,46 @@ const COLLECTION_PRODUCTS_QUERY = `#graphql
       }
     }
   }
+  ${FILTER_FRAGMENT}
+  ${PRODUCT_CARD_FRAGMENT}
+  ${IMAGE_FRAGMENT}
+  ${MONEY_FRAGMENT}
+`;
+
+const SEARCH_QUERY = `#graphql
+  query Search(
+    $terms: String!
+    $filters: [ProductFilter!]
+    $sortKey: SearchSortKeys
+    $reverse: Boolean
+    $language: LanguageCode
+  ) @inContext(language: $language) {
+    localization {
+      country {
+        currency {
+          symbol
+        }
+      }
+    }
+    search(
+      query: $terms
+      types: [PRODUCT]
+      first: 100
+      productFilters: $filters
+      sortKey: $sortKey
+      reverse: $reverse
+      unavailableProducts: LAST
+    ) {
+      productFilters {
+        ...Filter
+      }
+      nodes {
+        __typename
+        ...ProductCard
+      }
+    }
+  }
+  ${FILTER_FRAGMENT}
   ${PRODUCT_CARD_FRAGMENT}
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
@@ -200,6 +235,18 @@ const PRODUCT_QUERY = `#graphql
   ${MONEY_FRAGMENT}
 `;
 
+const RECOMMENDATIONS_QUERY = `#graphql
+  query Recommendations($handle: String!, $language: LanguageCode)
+  @inContext(language: $language) {
+    productRecommendations(productHandle: $handle, intent: RELATED) {
+      ...ProductCard
+    }
+  }
+  ${PRODUCT_CARD_FRAGMENT}
+  ${IMAGE_FRAGMENT}
+  ${MONEY_FRAGMENT}
+`;
+
 const COLOUR_INDEX_QUERY = `#graphql
   query ColourIndex($language: LanguageCode) @inContext(language: $language) {
     products(first: 50, sortKey: BEST_SELLING) {
@@ -267,7 +314,10 @@ export async function getCollection(handle: string) {
  * A collection's products, narrowed and sorted as the shopper chose, with the filters the store
  * offers for them. Each choice is a cache entry of its own, shared by everyone who makes it.
  */
-export async function getCollectionProducts(handle: string, browse: Browse = DEFAULT_BROWSE) {
+export async function getCollectionProducts(
+  handle: string,
+  browse: Browse<"collection"> = defaultBrowse("collection"),
+) {
   "use cache";
   cacheLife("hours");
   cacheTag(CATALOG_TAG);
@@ -280,6 +330,26 @@ export async function getCollectionProducts(handle: string, browse: Browse = DEF
   return { ...collection.products, currency: localization.country.currency.symbol };
 }
 
+/**
+ * The products that match a search, narrowed and sorted as the shopper chose, with the filters the
+ * store offers for them. As with a collection, each choice is a cache entry of its own.
+ */
+export async function searchProducts(browse: Browse<"search">) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(CATALOG_TAG);
+  const { search, localization } = await storefront(SEARCH_QUERY, {
+    terms: browse.terms,
+    ...queryFor(browse),
+    language: await language(),
+  });
+  return {
+    filters: search.productFilters,
+    nodes: search.nodes.filter((node) => node.__typename === "Product"),
+    currency: localization.country.currency.symbol,
+  };
+}
+
 export async function getProduct(handle: string) {
   "use cache";
   cacheLife("hours");
@@ -287,6 +357,21 @@ export async function getProduct(handle: string) {
   const { product } = await storefront(PRODUCT_QUERY, { handle, language: await language() });
   if (!product) return null;
   return { ...product, collections: { nodes: product.collections.nodes.filter(isRange) } };
+}
+
+/**
+ * Shopify's related products: worked out from sales, descriptions and collections, and adjustable
+ * in the Search & Discovery app. Up to ten, most related first.
+ */
+export async function getRecommendations(handle: string) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(CATALOG_TAG);
+  const { productRecommendations } = await storefront(RECOMMENDATIONS_QUERY, {
+    handle,
+    language: await language(),
+  });
+  return productRecommendations ?? [];
 }
 
 export async function getColourIndex() {

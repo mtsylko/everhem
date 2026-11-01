@@ -1,22 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Catalogue } from "@/components/catalogue";
-import { BrowseForm } from "@/components/collection/browse-form";
+import { BrowseListing } from "@/components/collection/browse-listing";
 import { formatPlural } from "@/i18n/format";
 import { localePath } from "@/i18n/locales";
 import { alternates } from "@/i18n/metadata";
 import { getDictionary, getLocale } from "@/i18n/server";
-import {
-  DEFAULT_BROWSE,
-  DEFAULT_SORT,
-  facetsFrom,
-  isNarrowed,
-  readBrowse,
-  searchFor,
-  toSearchParams,
-} from "@/lib/product/browse";
+import { readBrowse, toSearchParams } from "@/lib/product/browse";
 import {
   ALL_COLLECTION,
   getCollection,
@@ -87,7 +77,7 @@ async function CollectionProducts({
   handle: Promise<string>;
   query: Promise<URLSearchParams>;
 }) {
-  const browse = readBrowse(await query);
+  const browse = readBrowse(await query, "collection");
   const [listing, locale, { browse: words }] = await Promise.all([
     getCollectionProducts(await handle, browse),
     getLocale(),
@@ -96,37 +86,12 @@ async function CollectionProducts({
   // The heading beside this shows the 404 for a collection that doesn't exist.
   if (!listing) return null;
 
-  const products = listing.nodes;
-  const { lists, price } = facetsFrom(listing.filters);
-  const path = localePath(locale, `/collections/${await handle}`);
-  const cleared = `${path}${searchFor({ ...DEFAULT_BROWSE, sortBy: browse.sortBy })}`;
-
   return (
-    <div className="group">
-      <BrowseForm
-        path={path}
-        browse={browse}
-        lists={lists}
-        price={price}
-        currency={listing.currency}
-      />
-      <div className="mt-8 mb-6 flex flex-wrap items-baseline gap-x-6 gap-y-2">
-        <p role="status" className="text-muted">
-          {formatPlural(locale, words.results, products.length)}
-        </p>
-        {isNarrowed(browse) && (
-          <Link href={cleared} scroll={false} className="underline underline-offset-4">
-            {words.clear}
-          </Link>
-        )}
-      </div>
-      <div className="transition-opacity group-has-data-pending:opacity-40">
-        {products.length > 0 ? (
-          <Catalogue products={products} enterFrom={2} doubles={browse.sortBy === DEFAULT_SORT} />
-        ) : (
-          <p className="max-w-[40ch] pb-section text-lead">{words.empty}</p>
-        )}
-      </div>
-    </div>
+    <BrowseListing
+      path={localePath(locale, `/collections/${await handle}`)}
+      browse={browse}
+      listing={listing}
+      status={formatPlural(locale, words.results, listing.nodes.length)}
+    />
   );
 }
