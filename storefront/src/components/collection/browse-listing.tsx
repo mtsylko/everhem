@@ -60,6 +60,7 @@ export async function BrowseListing({ path, browse, listing, status }: BrowseLis
             products={listing.nodes}
             enterFrom={isCollection ? 2 : undefined}
             doubles={isCollection && browse.sortBy === DEFAULT_SORT.collection}
+            tileHeading="h2"
           />
         ) : (
           <p className="max-w-[40ch] pb-section text-lead">{words.empty}</p>

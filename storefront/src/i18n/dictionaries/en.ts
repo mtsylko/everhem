@@ -108,6 +108,8 @@ export const en = {
     oneMore: "One more {title}",
     quantity: "Quantity",
     remove: "Remove",
+    quantityChanged: "{title}: quantity {quantity}.",
+    removed: "{title} removed from your bag.",
     failed: "Something went wrong. Please try again.",
   },
   footer: {

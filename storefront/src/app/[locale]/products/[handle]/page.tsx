@@ -34,7 +34,8 @@ export async function generateMetadata({
 }: PageProps<"/[locale]/products/[handle]">): Promise<Metadata> {
   const { handle } = await params;
   const [product, locale] = await Promise.all([getProduct(handle), getLocale()]);
-  if (!product) return {};
+  // Thrown here, before the page streams, so the 404 has its own title and status.
+  if (!product) notFound();
   const image = product.images.nodes[0];
   const title = product.seo.title ?? product.title;
   const description = product.seo.description ?? product.description;

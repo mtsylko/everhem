@@ -11,7 +11,7 @@ export default function Error({ retry }: { error: unknown; retry: () => void }) 
       <button
         type="button"
         onClick={retry}
-        className="justify-self-start bg-ink px-6 py-3 font-medium text-ground transition-colors hover:bg-accent active:scale-[0.98]"
+        className="justify-self-start bg-ink px-6 py-3 font-medium text-ground transition-colors hover:bg-accent hover:text-accent-ink active:scale-[0.98]"
       >
         {error.retry}
       </button>

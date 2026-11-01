@@ -18,12 +18,17 @@ export async function Footer() {
 
   return (
     <footer className="mt-section grid grid-cols-2 gap-2 p-2 lg:grid-cols-12">
-      <div className="rise order-6 col-span-2 flex flex-col justify-between gap-8 bg-surface p-5 md:col-span-1 lg:order-none lg:col-span-4 lg:h-56 lg:p-6">
+      {/*
+        The boxes set a least height, not a height: longer copy or a reader's own text spacing makes
+        the row taller, instead of spilling over the box below.
+      */}
+      <div className="rise order-6 col-span-2 flex flex-col justify-between gap-8 bg-surface p-5 md:col-span-1 lg:order-none lg:col-span-4 lg:min-h-56 lg:p-6">
         <p className="text-lead">{footer.about}</p>
         <div className="space-y-1 text-small text-muted">
           <p>{footer.fictional}</p>
           <p>
-            <a href={HERO_PHOTO_CREDIT.url} className="underline-offset-4 hover:underline">
+            {/* Underlined: in the same grey as the line above, nothing else would mark it a link. */}
+            <a href={HERO_PHOTO_CREDIT.url} className="underline underline-offset-4 hover:text-ink">
               {format(footer.photoCredit, { author: HERO_PHOTO_CREDIT.author })}
             </a>
           </p>
@@ -32,7 +37,7 @@ export async function Footer() {
 
       <nav
         aria-label={footer.label}
-        className="rise order-3 bg-oatmeal p-5 lg:order-none lg:col-span-3 lg:h-56 lg:p-6"
+        className="rise order-3 bg-oatmeal p-5 lg:order-none lg:col-span-3 lg:min-h-56 lg:p-6"
       >
         <ul className="space-y-1">
           <li>
@@ -56,11 +61,11 @@ export async function Footer() {
         </ul>
       </nav>
 
-      <p className="rise order-5 col-span-2 bg-sage p-5 md:col-span-1 lg:order-none lg:col-span-2 lg:h-56 lg:p-6">
+      <p className="rise order-5 col-span-2 bg-sage p-5 md:col-span-1 lg:order-none lg:col-span-2 lg:min-h-56 lg:p-6">
         {footer.builtWith}
       </p>
 
-      <div className="rise order-4 flex flex-col justify-end bg-stone p-5 lg:order-none lg:col-span-3 lg:h-56 lg:p-6">
+      <div className="rise order-4 flex flex-col justify-end bg-stone p-5 lg:order-none lg:col-span-3 lg:min-h-56 lg:p-6">
         <a href={REPOSITORY} className="text-lead underline-offset-4 hover:underline">
           {footer.source}
         </a>
@@ -68,14 +73,14 @@ export async function Footer() {
 
       <p
         aria-hidden="true"
-        className="rise order-1 col-span-2 flex h-40 items-center justify-center overflow-hidden bg-ink text-display font-medium text-ground lg:order-none lg:col-span-8 lg:h-80"
+        className="rise order-1 col-span-2 flex min-h-40 items-center justify-center overflow-hidden bg-ink text-display font-medium text-ground lg:order-none lg:col-span-8 lg:min-h-80"
       >
         Everhem
       </p>
 
       <Link
         href={localePath(locale, "/#catalogue")}
-        className="rise group order-2 col-span-2 flex h-40 flex-col justify-between bg-accent p-5 text-accent-ink transition-colors hover:bg-accent-strong lg:order-none lg:col-span-4 lg:h-80 lg:p-6"
+        className="rise group order-2 col-span-2 flex min-h-40 flex-col justify-between bg-accent p-5 text-accent-ink transition-colors hover:bg-accent-strong lg:order-none lg:col-span-4 lg:min-h-80 lg:p-6"
       >
         <span className="text-head font-medium">{dictionary.shopTheBasics}</span>
         <svg

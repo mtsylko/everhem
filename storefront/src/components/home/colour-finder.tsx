@@ -62,8 +62,9 @@ export function ColourFinder({ colours }: { colours: readonly ColourEntry<Pictur
           })}
         </div>
 
-        <div aria-live="polite" className="w-full lg:max-w-64 lg:pb-[6svh]">
-          <p className="font-medium">
+        <div className="w-full lg:max-w-64 lg:pb-[6svh]">
+          {/* Only the count is read out: the whole list again on every pick would drown it. */}
+          <p aria-live="polite" className="font-medium">
             {formatPlural(locale, dictionary.home.stylesInColour, colour.products.length, {
               colour: colour.name,
               colourLower: colour.name.toLowerCase(),
